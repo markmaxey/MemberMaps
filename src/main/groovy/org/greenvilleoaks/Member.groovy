@@ -30,7 +30,22 @@ public final class Member {
     Long   durationInSeconds
     String durationHumanReadable
 
-    public Member(Map<String, String> memberMap, Map<String, String> propertyNames, DateTimeFormatter dateFormatter) {
+    final DateTimeFormatter dateFormatter
+
+
+    /**
+     * Construct a member bean
+     *
+     * @param memberMap A map where the keys are the values in the propertyNames map and the values are the values of the bean
+     * @param propertyNames A map where the keys are the property names of the bean and the values are the keys in the memberMap
+     * @param dateFormatter A date formatter (for the birthday)
+     */
+    public Member(
+            final Map<String, String> memberMap,
+            final Map<String, String> propertyNames,
+            final DateTimeFormatter dateFormatter) {
+        this.dateFormatter    = dateFormatter
+
         fullName              = memberMap.get(propertyNames.fullName)
         lastName              = memberMap.get(propertyNames.lastName)
         firstName             = memberMap.get(propertyNames.firstName)
@@ -38,24 +53,29 @@ public final class Member {
         address               = memberMap.get(propertyNames.address)
         city                  = memberMap.get(propertyNames.city)
         zip                   = intValueOf(memberMap.get(propertyNames.zip))
-        fullAddress           = memberMap.get(propertyNames.fullAddress) ?: "$address, $city $zip"
+        fullAddress           = "$address, $city $zip"
+        formattedAddress      = memberMap.get(propertyNames.formattedAddress)
         numInHousehold        = intValueOf(memberMap.get(propertyNames.numInHousehold))
 
-        birthday              = dateValueOf(memberMap.get(propertyNames.birthday), dateFormatter)
+        birthday              = dateValueOf(memberMap.get(propertyNames.birthday))
         age                   = (birthday) ? Period.between(birthday, LocalDate.now()).years : null
         grade                 = memberMap.get(propertyNames.grade)
 
         latitude              = doubleValueOf(memberMap.get(propertyNames.latitude))
         longitude             = doubleValueOf(memberMap.get(propertyNames.longitude))
 
-        distanceInMeters      = longValueOf(memberMap.get(propertyNames.distanceInMiles))
+        distanceInMeters      = longValueOf(memberMap.get(propertyNames.distanceInMeters))
         distanceHumanReadable = memberMap.get(propertyNames.distanceHumanReadable)
 
-        durationInSeconds     = longValueOf(memberMap.get(propertyNames.distanceInTime))
+        durationInSeconds     = longValueOf(memberMap.get(propertyNames.durationInSeconds))
         durationHumanReadable = memberMap.get(propertyNames.durationHumanReadable)
     }
 
 
+    /**
+     * @param propertyNames A map where the keys are the property names of the bean and the values are the keys in the memberMap
+     * @return A member map where the keys are the values of the propertyNames and the values are the property values of the member bean
+     */
     public Map<String, String> toMap(Map<String, String> propertyNames) {
         Map<String, String> map = new TreeMap<String, String>()
 
@@ -70,7 +90,7 @@ public final class Member {
         map.put(propertyNames.get("formattedAddress"), formattedAddress)
         map.put(propertyNames.get("numInHousehold"), valueOf(numInHousehold))
 
-        map.put(propertyNames.get("birthday"), birthday ? birthday.format(DateTimeFormatter.ISO_DATE) : "")
+        map.put(propertyNames.get("birthday"), valueOf(birthday))
         map.put(propertyNames.get("age"), valueOf(age))
         map.put(propertyNames.get("grade"), grade)
 
@@ -87,43 +107,38 @@ public final class Member {
     }
 
 
-    private static <T, E> T headerName2PropertyName(Map<T, E> map, E value) {
-        for (Map.Entry<T, E> entry : map.entrySet()) {
-            if (value.equals(entry.getValue())) {
-                return entry.getKey()
-            }
-        }
-        return null
-    }
-
-    private static Integer intValueOf(String value) {
+    private Integer intValueOf(String value) {
         return ((value != null) ? Integer.valueOf(value) : null)
     }
 
 
-    private static Long longValueOf(String value) {
+    private Long longValueOf(String value) {
         return ((value != null) ? Long.valueOf(value) : null)
     }
 
-    private static LocalDate dateValueOf(String value, DateTimeFormatter dateFormatter) {
+    private LocalDate dateValueOf(String value) {
         return (value != null) ? LocalDate.parse(value, dateFormatter) : null
     }
 
 
-    private static Double doubleValueOf(String value) {
+    private Double doubleValueOf(String value) {
         return (value != null) ? Double.valueOf(value) : null
     }
 
 
-    private static String valueOf(Integer value) {
-        return value ? Integer.valueOf(value) : ""
+    private String valueOf(Integer value) {
+        return value ? Integer.valueOf(value) : null
     }
 
-    private static String valueOf(Long value) {
-        return value ? Long.valueOf(value) : ""
+    private String valueOf(Long value) {
+        return value ? Long.valueOf(value) : null
     }
 
-    private static String valueOf(Double value) {
-        return value ? Double.valueOf(value) : ""
+    private String valueOf(Double value) {
+        return value ? Double.valueOf(value) : null
+    }
+
+    private String valueOf(LocalDate value) {
+        return value ? value.format(dateFormatter) : null
     }
 }
