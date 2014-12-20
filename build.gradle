@@ -1,0 +1,29 @@
+apply plugin: 'groovy'
+apply plugin: 'idea'
+apply plugin: 'jacoco'
+
+version = '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.apache.poi:poi:latest.integration'
+    compile 'org.apache.poi:poi-ooxml-schemas:latest.integration'
+    compile 'org.apache.poi:ooxml-schemas:latest.integration'
+    compile 'org.apache.poi:poi-ooxml:latest.integration'
+    compile 'com.google.apis:google-api-services-mapsengine:latest.integration'
+    compile 'net.sf.supercsv:super-csv:latest.integration'
+    compile 'org.codehaus.groovy:groovy-all:latest.integration'
+    compile 'com.google.maps:google-maps-services:latest.integration'
+    testCompile 'org.spockframework:spock-core:latest.integration'
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled false
+        csv.enabled false
+        html.destination "${buildDir}/jacocoHtml"
+    }
+}
