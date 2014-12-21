@@ -30,7 +30,7 @@ class ComputeNumInHousehold extends Specification {
                         "f", "g", "h", "i",
                         null, null, null, null, null
                 ])
-        MemberMap.computeNumInHousehold(members)
+        new Members(config).computeNumInHousehold(members)
 
         expect:
         members.find { it.address == "a" }.numInHousehold == 3
