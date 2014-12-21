@@ -56,7 +56,6 @@ class MemberSpec extends Specification {
         member.lastName == memberMap."Last Name"
         member.latitude ==  Double.valueOf(memberMap."Latitude")
         member.longitude == Double.valueOf(memberMap."Longitude")
-        member.numInHousehold == Integer.valueOf(memberMap."Number in Household")
         member.zip == Integer.valueOf(memberMap."Zip Code")
 
         Map<String, String> map = member.toMap(config.propertyNames)
@@ -76,7 +75,6 @@ class MemberSpec extends Specification {
         map."Last Name" == memberMap."Last Name"
         map."Latitude" == memberMap."Latitude"
         map."Longitude" == memberMap."Longitude"
-        map."Number in Household" == memberMap."Number in Household"
         map."Zip Code" == memberMap."Zip Code"
     }
 
@@ -102,7 +100,6 @@ class MemberSpec extends Specification {
         member.lastName == null
         member.latitude == null
         member.longitude == null
-        member.numInHousehold == null
         member.zip == null
 
         Map<String, String> map = member.toMap(config.propertyNames)
@@ -121,7 +118,6 @@ class MemberSpec extends Specification {
         map."Last Name" == null
         map."Latitude" == null
         map."Longitude" == null
-        map."Number in Household" == null
         map."Zip Code" == null
     }
 
