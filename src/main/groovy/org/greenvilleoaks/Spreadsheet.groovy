@@ -25,7 +25,7 @@ final class Spreadsheet {
             final String[] headers,
             final List<Map<String, String>> content) {
         Sheet sheet = createSheet(title)
-        createTitleRow(sheet, title)
+        createTitleRow(sheet, title, headers.size())
         createHeaderRow(sheet, headers)
         createContent(sheet, headers, content)
     }
@@ -41,13 +41,16 @@ final class Spreadsheet {
     }
 
 
-    private void createTitleRow(final Sheet sheet, final String title) {
+    private void createTitleRow(final Sheet sheet, final String title, final int titleCellWidth) {
         Row titleRow = sheet.createRow(0);
         titleRow.setHeightInPoints(45);
         Cell titleCell = titleRow.createCell(0);
         titleCell.setCellValue(title);
         titleCell.setCellStyle(styles.get("title"));
-        sheet.addMergedRegion(CellRangeAddress.valueOf('$A$1:$C$1'));
+
+        String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        String lastColumn = titleCellWidth < alphabet.size() ? alphabet.charAt(titleCellWidth - 1) : "Z"
+        sheet.addMergedRegion(CellRangeAddress.valueOf('$A$1:$' + lastColumn + '$1'));
     }
 
 
@@ -81,6 +84,8 @@ final class Spreadsheet {
             }
         }
     }
+
+
 
     /**
      * Write the workbook to a file.  The name of the file will created automatically and is guaranteed to be unique.

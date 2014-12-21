@@ -24,11 +24,24 @@ class Geodedic {
     public void create(final List<Member> members) {
         // Geocode any addresses that were missing from the Geodedic CSV file
         members.each { Member member ->
-            if (!findMemberGeodedic(member, geodedicMembers)) {
+            Member geodedicInfo = findMemberGeodedic(member, geodedicMembers)
+            if (!geodedicInfo) {
                 geocode(member)
                 addDistance(member)
 
                 geodedicMembers <<  member
+            }
+            else {
+                // Having loaded the persistent information from a file instead of asking Google for it,
+                // save this information in the member
+                member.latitude         = geodedicInfo.latitude
+                member.longitude        = geodedicInfo.longitude
+                member.formattedAddress = geodedicInfo.formattedAddress
+
+                member.commuteDistance2CentralPointInMeters      = geodedicInfo.commuteDistance2CentralPointInMeters
+                member.commuteDistance2CentralPointHumanReadable = geodedicInfo.commuteDistance2CentralPointHumanReadable
+                member.commuteTime2CentralPointInSeconds         = geodedicInfo.commuteTime2CentralPointInSeconds
+                member.commuteTime2CentralPointHumanReadable     = geodedicInfo.commuteTime2CentralPointHumanReadable
             }
         }
     }
@@ -73,8 +86,8 @@ class Geodedic {
         member.commuteDistance2CentralPointInMeters      = distanceMatrix.rows[0].elements[0].distance.inMeters
         member.commuteDistance2CentralPointHumanReadable = distanceMatrix.rows[0].elements[0].distance.humanReadable
 
-        member.commuteTime2CentralPointInSeconds     = distanceMatrix.rows[0].elements[0].duration.inSeconds
-        member.commute = distanceMatrix.rows[0].elements[0].duration.humanReadable
+        member.commuteTime2CentralPointInSeconds         = distanceMatrix.rows[0].elements[0].duration.inSeconds
+        member.commuteTime2CentralPointHumanReadable     = distanceMatrix.rows[0].elements[0].duration.humanReadable
     }
 
 

@@ -36,7 +36,29 @@ class MemberMap {
             members << new Member(it, config.propertyNames, config.dateFormatter)
         }
 
+        computeNumInHousehold(members)
+
         return members
+    }
+
+
+
+    public static void computeNumInHousehold(List<Member> members) {
+        Map<String, Integer> fullAddress2NumInHousehold = [:]
+        members.each { Member member ->
+            Integer numInHousehold = fullAddress2NumInHousehold.get(member.fullAddress)
+            if (numInHousehold == null) {
+                numInHousehold = new Integer(1)
+                fullAddress2NumInHousehold.put(member.fullAddress, numInHousehold)
+            }
+            else {
+                fullAddress2NumInHousehold.put(member.fullAddress, new Integer(numInHousehold + 1))
+            }
+        }
+
+        members.each { Member member ->
+            member.numInHousehold = fullAddress2NumInHousehold.get(member.fullAddress)
+        }
     }
 
 
@@ -83,8 +105,8 @@ class MemberMap {
         views << new ZipView(config.propertyNames.zip, members)
         views << new NumInHouseholdView(config.propertyNames.numInHousehold, members)
         views << new AgeView(config.propertyNames.age, members)
-        views << new DistanceView(config.propertyNames.commuteDistance2CentralPointInMeters, members)
-        views << new DurationView(config.propertyNames.commuteTime2CentralPointInSeconds, members)
+        views << new DistanceView("Commute Distance in Miles", members)
+        views << new DurationView("Commute Time in Minutes", members)
 
         return views
     }

@@ -20,8 +20,8 @@ public final class Member {
     final Integer    age
     final String     grade
     final LocalDate  birthday
-    final Integer    numInHousehold
 
+    Integer numInHousehold
     String formattedAddress
     Double latitude
     Double longitude
@@ -54,7 +54,6 @@ public final class Member {
         city                  = memberMap.get(propertyNames.city)
         zip                   = intValueOf(memberMap.get(propertyNames.zip))
         formattedAddress      = memberMap.get(propertyNames.formattedAddress)
-        numInHousehold        = intValueOf(memberMap.get(propertyNames.numInHousehold))
 
         birthday              = dateValueOf(memberMap.get(propertyNames.birthday))
         age                   = (birthday) ? Period.between(birthday, LocalDate.now()).years : null

@@ -46,11 +46,11 @@ abstract class View {
 
         data.each { String category, List<Map<String, Object>> members ->
             double percentage = (double)members.size() / (double)totalNumMembers
-            stats << [
-                    "$headers[0]" : category,
-                    "$headers[1]" : String.format("%${memberSizeWidth}d", members.size()),
-                    "$headers[2]" : String.format("%3d", (int)(percentage * 100))
-            ]
+            Map<String, String> stat = new TreeMap<String, String>()
+            stat.put(headers[0], category)
+            stat.put(headers[1], String.format("%${memberSizeWidth}d", members.size()))
+            stat.put(headers[2], String.format("%3d", (int)(percentage * 100)))
+            stats << stat
         }
 
         return stats
