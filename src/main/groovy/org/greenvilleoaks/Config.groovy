@@ -30,6 +30,8 @@ class Config {
             "age": "Age",
             "grade": "School Grade",
 
+            "role": "Role",
+
             "latitude": "Latitude",
             "longitude": "Longitude",
 

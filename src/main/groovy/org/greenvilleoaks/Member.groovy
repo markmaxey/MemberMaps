@@ -20,6 +20,7 @@ public final class Member {
     final Integer    age
     final String     grade
     final LocalDate  birthday
+    final String     role
 
     Integer numInHousehold
     String formattedAddress
@@ -58,6 +59,7 @@ public final class Member {
         birthday              = dateValueOf(memberMap.get(propertyNames.birthday))
         age                   = (birthday) ? Period.between(birthday, LocalDate.now()).years : null
         grade                 = memberMap.get(propertyNames.grade)
+        role                  = memberMap.get(propertyNames.role)
 
         latitude              = doubleValueOf(memberMap.get(propertyNames.latitude))
         longitude             = doubleValueOf(memberMap.get(propertyNames.longitude))
@@ -110,6 +112,7 @@ public final class Member {
         map.put(propertyNames.get("birthday"), valueOf(birthday))
         map.put(propertyNames.get("age"), valueOf(age))
         map.put(propertyNames.get("grade"), grade)
+        map.put(propertyNames.get("role"), role)
 
         map.put(propertyNames.get("latitude"),  valueOf(latitude))
         map.put(propertyNames.get("longitude"), valueOf(longitude))

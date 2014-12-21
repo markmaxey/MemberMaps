@@ -27,6 +27,8 @@ class MemberSpec extends Specification {
                 "Age": "COMPUTED",
                 "School Grade": "Graduated",
 
+                "Role": "Small Group Leader",
+
                 "Latitude": "1.234",
                 "Longitude": "5.678",
 
@@ -53,6 +55,7 @@ class MemberSpec extends Specification {
         member.fullAddress == "132 Collin Ct, Murphy 75094"
         member.fullName == memberMap."Directory Name"
         member.grade == memberMap."School Grade"
+        member.role == memberMap."Role"
         member.lastName == memberMap."Last Name"
         member.latitude ==  Double.valueOf(memberMap."Latitude")
         member.longitude == Double.valueOf(memberMap."Longitude")
@@ -72,6 +75,7 @@ class MemberSpec extends Specification {
         map."Full Address" == "132 Collin Ct, Murphy 75094"
         map."Directory Name" == memberMap."Directory Name"
         map."School Grade" == memberMap."School Grade"
+        map."Role" == memberMap."Role"
         map."Last Name" == memberMap."Last Name"
         map."Latitude" == memberMap."Latitude"
         map."Longitude" == memberMap."Longitude"
@@ -97,6 +101,7 @@ class MemberSpec extends Specification {
         member.formattedAddress == null
         member.fullName == null
         member.grade == null
+        member.role == null
         member.lastName == null
         member.latitude == null
         member.longitude == null
@@ -115,6 +120,7 @@ class MemberSpec extends Specification {
         map."Formatted Address" == null
         map."Directory Name" == null
         map."School Grade" == null
+        map."Role" == null
         map."Last Name" == null
         map."Latitude" == null
         map."Longitude" == null

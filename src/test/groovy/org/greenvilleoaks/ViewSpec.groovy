@@ -6,6 +6,7 @@ import org.greenvilleoaks.view.DistanceView
 import org.greenvilleoaks.view.DurationView
 import org.greenvilleoaks.view.GradeView
 import org.greenvilleoaks.view.NumInHouseholdView
+import org.greenvilleoaks.view.RoleView
 import org.greenvilleoaks.view.View
 import org.greenvilleoaks.view.ZipView
 import spock.lang.Shared
@@ -133,6 +134,20 @@ class ViewSpec extends Specification {
 
         expect:
         view.name == config.propertyNames.grade
+        view.data.get("a").size() == 2
+        view.data.get("b").size() == 1
+        view.data.get(View.NULL_BIN_NAME).size() == 1
+    }
+
+
+
+    def "Role"() {
+        setup:
+        View view = new RoleView(config.propertyNames.role,
+                memberList(config.propertyNames.role, ["a", "b", null, "a"]))
+
+        expect:
+        view.name == config.propertyNames.role
         view.data.get("a").size() == 2
         view.data.get("b").size() == 1
         view.data.get(View.NULL_BIN_NAME).size() == 1

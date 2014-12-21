@@ -35,6 +35,7 @@ class MemberMap {
         views << new NumInHouseholdView(config.propertyNames.numInHousehold, members)
         views << new AgeView(config.propertyNames.age, members)
         views << new GradeView(config.propertyNames.grade, members)
+        views << new RoleView(config.propertyNames.role, members)
         views << new DistanceView("Commute Distance in Miles", members)
         views << new DurationView("Commute Time in Minutes", members)
 
