@@ -1,10 +1,12 @@
 package org.greenvilleoaks
 
+import groovy.util.logging.Log4j
 import org.greenvilleoaks.view.*
 
 /**
  * This is the "main" class containing all the control logic.
  */
+@Log4j
 class MemberMap {
     public static final Config config = new Config()
 
@@ -13,6 +15,9 @@ class MemberMap {
      * @param argv
      */
     public static void main(final String[] argv) {
+        log.info("Generating a members map and spreadsheet ...")
+        log.info(config.toString())
+
         List<Member> members = new Members(config).createMembers()
 
         List<View> views = createViews(members)

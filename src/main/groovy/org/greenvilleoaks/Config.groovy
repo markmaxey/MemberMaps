@@ -1,9 +1,11 @@
 package org.greenvilleoaks
 
 import com.google.maps.GeoApiContext
+import groovy.transform.ToString
 
 import java.time.format.DateTimeFormatter
 
+@ToString(includeNames = true, includeFields = true)
 class Config {
     public final GeoApiContext context = new GeoApiContext()
 

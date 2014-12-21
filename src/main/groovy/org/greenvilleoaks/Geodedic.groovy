@@ -2,8 +2,9 @@ package org.greenvilleoaks
 
 import com.google.maps.model.DistanceMatrix
 import com.google.maps.model.GeocodingResult
-import groovy.transform.Immutable
+import groovy.util.logging.Log4j
 
+@Log4j
 final class Geodedic {
     private final String centralAddress
     private final List<Member> geodedicMembers
@@ -23,6 +24,8 @@ final class Geodedic {
      * @param members The list of members
      */
     public void create(final List<Member> members) {
+        log.info("Geocoding members addresses ...")
+
         // Geocode any addresses that were missing from the Geodedic CSV file
         members.each { Member member ->
             Member geodedicInfo = findMemberGeodedic(member, geodedicMembers)
@@ -45,6 +48,8 @@ final class Geodedic {
                 member.commuteTime2CentralPointHumanReadable     = geodedicInfo.commuteTime2CentralPointHumanReadable
             }
         }
+
+        log.info("Finished geocoding members addresses")
     }
 
 
@@ -53,15 +58,16 @@ final class Geodedic {
         GeocodingResult[] results = google.geocode(member.fullAddress)
 
         if (!results || (results.size() == 0)) {
-            throw new RuntimeException("No address was found for '$member.fullAddress'")
+            log.error("No address was found for '$member.fullAddress'")
         }
         else if (results && results.size() > 1) {
-            throw new RuntimeException("${results.size()} addresses were found for '$member.fullAddress'")
+            log.error("${results.size()} addresses were found for '$member.fullAddress'")
         }
-
-        member.latitude         = results[0].geometry.location.lat
-        member.longitude        = results[0].geometry.location.lng
-        member.formattedAddress = results[0].formattedAddress
+        else {
+            member.latitude         = results[0].geometry.location.lat
+            member.longitude        = results[0].geometry.location.lng
+            member.formattedAddress = results[0].formattedAddress
+        }
     }
 
 
@@ -71,21 +77,22 @@ final class Geodedic {
         if (!distanceMatrix || !distanceMatrix.rows ||
                 (distanceMatrix.rows.size() == 0) ||
                 (distanceMatrix.rows[0].elements.size() == 0)) {
-            throw new RuntimeException("Can't find distance from '$member.fullAddress' to '$centralAddress'")
+            log.error("Can't find distance from '$member.fullAddress' to '$centralAddress'")
 
         }
         else if (distanceMatrix && distanceMatrix.rows && distanceMatrix.rows.size() > 1) {
-            throw new RuntimeException("${distanceMatrix.rows.size()} distance matrix rows were found from '$member.fullAddress' to '$centralAddress'")
+            log.error("${distanceMatrix.rows.size()} distance matrix rows were found from '$member.fullAddress' to '$centralAddress'")
         }
         else if (distanceMatrix && distanceMatrix.rows && distanceMatrix.rows[0].elements.size() > 1) {
-            throw new RuntimeException("${distanceMatrix.rows[0].elements.size()} distance matrix elements were found from '$member.fullAddress' to '$centralAddress'")
+            log.error("${distanceMatrix.rows[0].elements.size()} distance matrix elements were found from '$member.fullAddress' to '$centralAddress'")
         }
+        else {
+            member.commuteDistance2CentralPointInMeters      = distanceMatrix.rows[0].elements[0].distance.inMeters
+            member.commuteDistance2CentralPointHumanReadable = distanceMatrix.rows[0].elements[0].distance.humanReadable
 
-        member.commuteDistance2CentralPointInMeters      = distanceMatrix.rows[0].elements[0].distance.inMeters
-        member.commuteDistance2CentralPointHumanReadable = distanceMatrix.rows[0].elements[0].distance.humanReadable
-
-        member.commuteTime2CentralPointInSeconds         = distanceMatrix.rows[0].elements[0].duration.inSeconds
-        member.commuteTime2CentralPointHumanReadable     = distanceMatrix.rows[0].elements[0].duration.humanReadable
+            member.commuteTime2CentralPointInSeconds         = distanceMatrix.rows[0].elements[0].duration.inSeconds
+            member.commuteTime2CentralPointHumanReadable     = distanceMatrix.rows[0].elements[0].duration.humanReadable
+        }
     }
 
 

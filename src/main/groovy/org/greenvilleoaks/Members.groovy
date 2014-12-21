@@ -1,5 +1,8 @@
 package org.greenvilleoaks
 
+import groovy.util.logging.Log4j
+
+@Log4j
 public final class Members {
     final Config config
 
@@ -16,11 +19,14 @@ public final class Members {
     }
 
     private List<Member> loadMembers() {
+        log.info("Loading members from '$config.membersCsvFileName' ...")
         List<Member> members = []
 
         new Csv(config.membersCsvFileName).load().each {
             members << new Member(it, config.propertyNames, config.dateFormatter)
         }
+
+        log.info("Loaded ${members.size()} members")
 
         computeNumInHousehold(members)
 
@@ -28,8 +34,13 @@ public final class Members {
     }
 
 
-
+    /**
+     * Compute the number of people in each household (address)
+     * @param members
+     */
     public void computeNumInHousehold(List<Member> members) {
+        log.info("Computing the number of people in each household ...")
+
         Map<String, Integer> fullAddress2NumInHousehold = [:]
         members.each { Member member ->
             Integer numInHousehold = fullAddress2NumInHousehold.get(member.fullAddress)
@@ -49,21 +60,28 @@ public final class Members {
 
 
     private List<Member> loadGeodedicInfo() {
+        log.info("Loading cached geodedic information from '$config.geodedicCsvFileName' ...")
         List<Member> members = []
 
         new Csv(config.geodedicCsvFileName, config.geodedicCsvHeaders).load().each {
             members << new Member(it, config.propertyNames, config.dateFormatter)
         }
 
+        log.info("Loaded ${members.size()} addresses with geodedic information")
+
         return members
     }
 
 
     private void storeGeodedicInfo(List<Member> geodedicInfo) {
+        log.info("Caching geodedic information to '$config.geodedicCsvFileName' ...")
+
         List<Map<String, Object>> geodedicListOfMaps = []
         geodedicInfo.each { geodedicListOfMaps << it.toMap(config.propertyNames)}
 
         new Csv(config.geodedicCsvFileName, config.geodedicCsvHeaders).store(geodedicListOfMaps)
+
+        log.info("Cached ${geodedicListOfMaps.size()} addresses with geodedic information")
     }
 
 

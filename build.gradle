@@ -21,6 +21,8 @@ dependencies {
     compile 'net.sf.supercsv:super-csv:latest.integration'
     compile 'org.codehaus.groovy:groovy-all:latest.integration'
     compile 'com.google.maps:google-maps-services:latest.integration'
+    compile 'log4j:log4j:latest.integration'
+
     testCompile 'org.spockframework:spock-core:latest.integration'
 }
 
