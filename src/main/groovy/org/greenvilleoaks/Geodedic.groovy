@@ -1,18 +1,19 @@
 package org.greenvilleoaks
 
-import com.google.maps.DistanceMatrixApi
-import com.google.maps.GeoApiContext
-import com.google.maps.GeocodingApi
 import com.google.maps.model.DistanceMatrix
 import com.google.maps.model.GeocodingResult
-import com.google.maps.model.Unit
 import groovy.transform.Immutable
 
-@Immutable
-class Geodedic {
-    private String centralAddress
-    private GeoApiContext context
-    private List<Member> geodedicMembers
+final class Geodedic {
+    private final String centralAddress
+    private final List<Member> geodedicMembers
+    private final Google google
+
+    public Geodedic(final String centralAddress, List<Member> geodedicMembers, Google google) {
+        this.centralAddress  = centralAddress
+        this.geodedicMembers = geodedicMembers
+        this.google          = google
+    }
 
 
     /**
@@ -49,7 +50,7 @@ class Geodedic {
 
 
     private void geocode(Member member) {
-        GeocodingResult[] results = GeocodingApi.geocode(context, member.fullAddress).await()
+        GeocodingResult[] results = google.geocode(member.fullAddress)
 
         if (!results || (results.size() == 0)) {
             throw new RuntimeException("No address was found for '$member.fullAddress'")
@@ -65,10 +66,7 @@ class Geodedic {
 
 
     private void addDistance(Member member) {
-        DistanceMatrix distanceMatrix = DistanceMatrixApi.getDistanceMatrix(
-                context, [member.fullAddress] as String[], [centralAddress] as String[]).
-                units(Unit.IMPERIAL).
-                await()
+        DistanceMatrix distanceMatrix = google.distanceMatrix(member.fullAddress, centralAddress)
 
         if (!distanceMatrix || !distanceMatrix.rows ||
                 (distanceMatrix.rows.size() == 0) ||

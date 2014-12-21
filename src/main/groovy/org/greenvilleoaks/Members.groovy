@@ -1,6 +1,5 @@
 package org.greenvilleoaks
 
-
 public final class Members {
     final Config config
 
@@ -75,7 +74,7 @@ public final class Members {
     private void geocodeMembers(final List<Member> members, final List<Member> geodedicInfo) {
         config.context.apiKey = config.apiKey
 
-        Geodedic geocode = new Geodedic(centralAddress: config.centralAddress, context: config.context, geodedicMembers: geodedicInfo)
+        Geodedic geocode = new Geodedic(config.centralAddress, geodedicInfo, new Google(config.context))
 
         geocode.create(members)
     }
