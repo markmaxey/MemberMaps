@@ -12,6 +12,8 @@ final class AgeView extends View {
 
     public Map<String, List<Member>> createViewData(final List<Member> members) {
         return create(members, { Member member ->
+            if (member.age == null) return NULL_BIN_NAME
+
             String ageBin
             int age = Integer.valueOf(member.age)
 

@@ -11,6 +11,6 @@ final class ZipView extends View {
     public ZipView(final String name, final List<Member> members) { super(name, members) }
 
     public Map<String, List<Member>> createViewData(final List<Member> members) {
-        return create(members, { Member member -> member.zip })
+        return create(members, { Member member -> member.zip ?: NULL_BIN_NAME})
     }
 }

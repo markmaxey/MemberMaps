@@ -12,8 +12,9 @@ final class DistanceView extends View {
 
     public Map<String, List<Member>> createViewData(final List<Member> members) {
         return create(members, { Member member ->
-            int miles = member.distanceInMeters * 0.000621371d
-            return Integer.toString(miles)
+            if (member.commuteDistance2CentralPointInMeters == null) return NULL_BIN_NAME
+            int miles = member.commuteDistance2CentralPointInMeters * 0.000621371d
+            return Integer.toString(miles-1) + "-" + Integer.toString(miles)
         })
     }
 }

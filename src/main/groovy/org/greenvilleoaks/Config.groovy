@@ -33,18 +33,20 @@ class Config {
             "latitude": "Latitude",
             "longitude": "Longitude",
 
-            "distanceInMeters": "Distance In Meters",
-            "distanceHumanReadable": "Distance",
+            "commuteDistance2CentralPointInMeters": "Commute Distance In Meters",
+            "commuteDistance2CentralPointHumanReadable": "Commute Distance",
 
-            "durationInSeconds": "Duration In Seconds",
-            "durationHumanReadable": "Duration"
+            "commuteTime2CentralPointInSeconds": "Commute Time In Seconds",
+            "commuteTime2CentralPointHumanReadable": "Commute Time"
     ] as TreeMap<String, String>
 
     public final String[] geodedicCsvHeaders = [
             propertyNames.address,  propertyNames.city, propertyNames.zip,
             propertyNames.latitude, propertyNames.longitude,
-            propertyNames.distanceInMeters, propertyNames.distanceHumanReadable,
-            propertyNames.durationInSeconds, propertyNames.durationHumanReadable,
+            propertyNames.commuteDistance2CentralPointInMeters,
+            propertyNames.commuteDistance2CentralPointHumanReadable,
+            propertyNames.commuteTime2CentralPointInSeconds,
+            propertyNames.commuteTime2CentralPointHumanReadable,
             propertyNames.formattedAddress
     ] as String[]
 

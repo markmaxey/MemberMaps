@@ -25,10 +25,10 @@ public final class Member {
     String formattedAddress
     Double latitude
     Double longitude
-    Long   distanceInMeters
-    String distanceHumanReadable
-    Long   durationInSeconds
-    String durationHumanReadable
+    Long   commuteDistance2CentralPointInMeters
+    String commuteDistance2CentralPointHumanReadable
+    Long   commuteTime2CentralPointInSeconds
+    String commuteTime2CentralPointHumanReadable
 
     final DateTimeFormatter dateFormatter
 
@@ -53,7 +53,6 @@ public final class Member {
         address               = memberMap.get(propertyNames.address)
         city                  = memberMap.get(propertyNames.city)
         zip                   = intValueOf(memberMap.get(propertyNames.zip))
-        fullAddress           = "$address, $city $zip"
         formattedAddress      = memberMap.get(propertyNames.formattedAddress)
         numInHousehold        = intValueOf(memberMap.get(propertyNames.numInHousehold))
 
@@ -64,11 +63,30 @@ public final class Member {
         latitude              = doubleValueOf(memberMap.get(propertyNames.latitude))
         longitude             = doubleValueOf(memberMap.get(propertyNames.longitude))
 
-        distanceInMeters      = longValueOf(memberMap.get(propertyNames.distanceInMeters))
-        distanceHumanReadable = memberMap.get(propertyNames.distanceHumanReadable)
+        commuteDistance2CentralPointInMeters      = longValueOf(memberMap.get(propertyNames.commuteDistance2CentralPointInMeters))
+        commuteDistance2CentralPointHumanReadable = memberMap.get(propertyNames.commuteDistance2CentralPointHumanReadable)
 
-        durationInSeconds     = longValueOf(memberMap.get(propertyNames.durationInSeconds))
-        durationHumanReadable = memberMap.get(propertyNames.durationHumanReadable)
+        commuteTime2CentralPointInSeconds     = longValueOf(memberMap.get(propertyNames.commuteTime2CentralPointInSeconds))
+        commuteTime2CentralPointHumanReadable = memberMap.get(propertyNames.commuteTime2CentralPointHumanReadable)
+
+        if (address && city && zip) {
+            fullAddress = address + ", " + city + " " + zip
+        } else if (address && city) {
+            fullAddress = address + ", " + city
+        } else if (address && zip) {
+            fullAddress = address + " " + zip
+        } else if (city && zip) {
+            fullAddress = city + " " + zip
+        } else if (address) {
+            fullAddress = address
+        } else if (city) {
+            fullAddress = city
+        } else if (zip) {
+            fullAddress = zip
+        }
+        else {
+            fullAddress = null
+        }
     }
 
 
@@ -97,11 +115,11 @@ public final class Member {
         map.put(propertyNames.get("latitude"),  valueOf(latitude))
         map.put(propertyNames.get("longitude"), valueOf(longitude))
 
-        map.put(propertyNames.get("distanceInMeters"), valueOf(distanceInMeters))
-        map.put(propertyNames.get("distanceHumanReadable"), distanceHumanReadable)
+        map.put(propertyNames.get("commuteDistance2CentralPointInMeters"), valueOf(commuteDistance2CentralPointInMeters))
+        map.put(propertyNames.get("commuteDistance2CentralPointHumanReadable"), commuteDistance2CentralPointHumanReadable)
 
-        map.put(propertyNames.get("durationInSeconds"), valueOf(durationInSeconds))
-        map.put(propertyNames.get("durationHumanReadable"), durationHumanReadable)
+        map.put(propertyNames.get("commuteTime2CentralPointInSeconds"), valueOf(commuteTime2CentralPointInSeconds))
+        map.put(propertyNames.get("commuteTime2CentralPointHumanReadable"), commuteTime2CentralPointHumanReadable)
 
         return map
     }

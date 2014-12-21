@@ -83,8 +83,8 @@ class MemberMap {
         views << new ZipView(config.propertyNames.zip, members)
         views << new NumInHouseholdView(config.propertyNames.numInHousehold, members)
         views << new AgeView(config.propertyNames.age, members)
-        views << new DistanceView(config.propertyNames.distanceInMeters, members)
-        views << new DurationView(config.propertyNames.durationInSeconds, members)
+        views << new DistanceView(config.propertyNames.commuteDistance2CentralPointInMeters, members)
+        views << new DurationView(config.propertyNames.commuteTime2CentralPointInSeconds, members)
 
         return views
     }

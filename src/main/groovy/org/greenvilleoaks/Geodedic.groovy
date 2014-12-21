@@ -70,11 +70,11 @@ class Geodedic {
             throw new RuntimeException("${distanceMatrix.rows[0].elements.size()} distance matrix elements were found from '$member.fullAddress' to '$centralAddress'")
         }
 
-        member.distanceInMeters      = distanceMatrix.rows[0].elements[0].distance.inMeters
-        member.distanceHumanReadable = distanceMatrix.rows[0].elements[0].distance.humanReadable
+        member.commuteDistance2CentralPointInMeters      = distanceMatrix.rows[0].elements[0].distance.inMeters
+        member.commuteDistance2CentralPointHumanReadable = distanceMatrix.rows[0].elements[0].distance.humanReadable
 
-        member.durationInSeconds     = distanceMatrix.rows[0].elements[0].duration.inSeconds
-        member.durationHumanReadable = distanceMatrix.rows[0].elements[0].duration.humanReadable
+        member.commuteTime2CentralPointInSeconds     = distanceMatrix.rows[0].elements[0].duration.inSeconds
+        member.commute = distanceMatrix.rows[0].elements[0].duration.humanReadable
     }
 
 

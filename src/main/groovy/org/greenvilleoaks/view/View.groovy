@@ -10,6 +10,8 @@ import org.greenvilleoaks.Member
 @ToString
 @EqualsAndHashCode
 abstract class View {
+    public static final String NULL_BIN_NAME = "Unspecified"
+
     /** The name of the perspective */
     final String name
 

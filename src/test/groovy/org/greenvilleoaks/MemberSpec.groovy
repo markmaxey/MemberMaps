@@ -30,11 +30,11 @@ class MemberSpec extends Specification {
                 "Latitude": "1.234",
                 "Longitude": "5.678",
 
-                "Distance In Meters": "99",
-                "Distance": "99 miles",
+                "Commute Distance In Meters": "99",
+                "Commute Distance": "99 miles",
 
-                "Duration In Seconds": "99",
-                "Duration": "99 minutes"
+                "Commute Time In Seconds": "99",
+                "Commute Time": "99 minutes"
         ]
 
         Member member = new Member(memberMap, config.propertyNames, config.dateFormatter)
@@ -44,10 +44,10 @@ class MemberSpec extends Specification {
         member.age == Period.between(LocalDate.of(1969, 5, 30), LocalDate.now()).years
         member.birthday == LocalDate.of(1969, 5, 30)
         member.city == memberMap."City"
-        member.distanceHumanReadable == memberMap."Distance"
-        member.distanceInMeters == Long.valueOf(memberMap."Distance In Meters")
-        member.durationHumanReadable == memberMap."Duration"
-        member.durationInSeconds == Long.valueOf(memberMap."Duration In Seconds")
+        member.commuteDistance2CentralPointHumanReadable == memberMap."Commute Distance"
+        member.commuteDistance2CentralPointInMeters == Long.valueOf(memberMap."Commute Distance In Meters")
+        member.commuteTime2CentralPointHumanReadable == memberMap."Commute Time"
+        member.commuteTime2CentralPointInSeconds == Long.valueOf(memberMap."Commute Time In Seconds")
         member.firstName == memberMap."Preferred Name"
         member.formattedAddress == memberMap."Formatted Address"
         member.fullAddress == "132 Collin Ct, Murphy 75094"
@@ -64,10 +64,10 @@ class MemberSpec extends Specification {
         map."Age" == Integer.toString(Period.between(LocalDate.of(1969, 5, 30), LocalDate.now()).years)
         map."Birth Date" == memberMap."Birth Date"
         map."City" == memberMap."City"
-        map."Distance" == memberMap."Distance"
-        map."Distance In Meters" == memberMap."Distance In Meters"
-        map."Duration" == memberMap."Duration"
-        map."Duration In Seconds" == memberMap."Duration In Seconds"
+        map."Commute Distance" == memberMap."Commute Distance"
+        map."Commute Distance In Meters" == memberMap."Commute Distance In Meters"
+        map."Commute Time" == memberMap."Commute Time"
+        map."Commute Time In Seconds" == memberMap."Commute Time In Seconds"
         map."Preferred Name" == memberMap."Preferred Name"
         map."Formatted Address" == memberMap."Formatted Address"
         map."Full Address" == "132 Collin Ct, Murphy 75094"
@@ -91,10 +91,10 @@ class MemberSpec extends Specification {
         member.age == null
         member.birthday == null
         member.city == null
-        member.distanceHumanReadable == null
-        member.distanceInMeters == null
-        member.durationHumanReadable == null
-        member.durationInSeconds == null
+        member.commuteDistance2CentralPointHumanReadable == null
+        member.commuteDistance2CentralPointInMeters == null
+        member.commuteTime2CentralPointInSeconds == null
+        member.commuteTime2CentralPointHumanReadable == null
         member.firstName == null
         member.formattedAddress == null
         member.fullName == null
@@ -110,10 +110,10 @@ class MemberSpec extends Specification {
         map."Age" == null
         map."Birth Date" == null
         map."City" == null
-        map."Distance" == null
-        map."Distance In Meters" == null
-        map."Duration" == null
-        map."Duration In Seconds" == null
+        map."Commute Distance" == null
+        map."Commute Distance In Meters" == null
+        map."Commute Time" == null
+        map."Commute Time In Seconds" == null
         map."Preferred Name" == null
         map."Formatted Address" == null
         map."Directory Name" == null
@@ -123,5 +123,29 @@ class MemberSpec extends Specification {
         map."Longitude" == null
         map."Number in Household" == null
         map."Zip Code" == null
+    }
+
+
+    def "Full Address"(String address, String city, String zip, String fullAddress) {
+        expect:
+        Member member = new Member([
+                "Address" : address,
+                "City"    : city,
+                "Zip Code": zip
+        ], config.propertyNames, config.dateFormatter)
+
+        member.fullAddress == fullAddress
+
+
+        where:
+        address | city | zip  | fullAddress
+        "a"     | "b"  | "9"  | "a, b 9"
+        null    | "b"  | "9"  | "b 9"
+        "a"     | null | "9"  | "a 9"
+        "a"     | "b"  | null | "a, b"
+        null    | null | "9"  | "9"
+        null    | "b"  | null | "b"
+        "a"     | null | null | "a"
+        null    | null | null | null
     }
 }

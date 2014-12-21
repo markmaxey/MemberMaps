@@ -11,6 +11,6 @@ final class CityView extends View {
     public CityView(final String name, final List<Member> members) { super(name, members) }
 
     public Map<String, List<Member>> createViewData(final List<Member> members) {
-        return create(members, { Member member -> member.city })
+        return create(members, { Member member -> member.city ?: NULL_BIN_NAME })
     }
 }
