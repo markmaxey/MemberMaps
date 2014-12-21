@@ -4,6 +4,7 @@ import org.greenvilleoaks.view.AgeView
 import org.greenvilleoaks.view.CityView
 import org.greenvilleoaks.view.DistanceView
 import org.greenvilleoaks.view.DurationView
+import org.greenvilleoaks.view.GradeView
 import org.greenvilleoaks.view.NumInHouseholdView
 import org.greenvilleoaks.view.View
 import org.greenvilleoaks.view.ZipView
@@ -120,6 +121,20 @@ class ViewSpec extends Specification {
         view.name == config.propertyNames.zip
         view.data.get("2").size() == 2
         view.data.get("1").size() == 1
+        view.data.get(View.NULL_BIN_NAME).size() == 1
+    }
+
+
+
+    def "Grade"() {
+        setup:
+        View view = new GradeView(config.propertyNames.grade,
+                memberList(config.propertyNames.grade, ["a", "b", null, "a"]))
+
+        expect:
+        view.name == config.propertyNames.grade
+        view.data.get("a").size() == 2
+        view.data.get("b").size() == 1
         view.data.get(View.NULL_BIN_NAME).size() == 1
     }
 
