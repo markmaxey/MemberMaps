@@ -16,7 +16,7 @@ abstract class View {
     final String name
 
     /** The perspective data */
-    final Map<String, List<Map<String, Object>>> data
+    final Map<String, List<Member>> data
 
     /** The column headers and map keys */
     final String[] headers = ["Category", "Number of Members", "Percentage of Members"]
@@ -28,32 +28,57 @@ abstract class View {
     }
 
 
-    abstract Map<String, List<Map<String, Object>>> createViewData(final List<Member> members);
+
+    /**
+     * Template method
+     * @param members List of member information
+     * @return members categorized based on some criteria where the keys are the criteria and the values
+     * are the lists of members meeting that criteria.
+     */
+    abstract Map<String, List<Member>> createViewData(final List<Member> members);
+
 
 
     /**
-     * @return A histogram of the member's perspective
+     * @return histogram statistics of the member's perspective
      */
-    public List<Map<String, Object>> createStats() {
+    public List<Map<String, String>> createStats() {
+        int totalNumMembers = calculateTheTotalNumberOfMembers()
+
+        int maxNumMembersInAnyCategory = calculateTheMaximumNumberOfMembersInAnyCategory()
+
+        return histogramStats(totalNumMembers, maxNumMembersInAnyCategory)
+    }
+
+
+
+    private List<Map<String, String>> histogramStats(int totalNumMembers, maxNumMembersInAnyCategory) {
         List<Map<String, String>> stats = []
-        int totalNumMembers = 0
-        data.values().each { List<Map<String, Object>> members -> totalNumMembers += members.size() }
-
-        int memberSizeWidth = 0
-        data.values().each { List<Map<String, Object>> members ->
-            if (memberSizeWidth < members.size()) memberSizeWidth = members.size()
-        }
-
-        data.each { String category, List<Map<String, Object>> members ->
-            double percentage = (double)members.size() / (double)totalNumMembers
+        data.each { String category, List<Member> members ->
+            double percentage = (double) members.size() / (double) totalNumMembers
             Map<String, String> stat = new TreeMap<String, String>()
             stat.put(headers[0], category)
-            stat.put(headers[1], String.format("%${memberSizeWidth}d", members.size()))
-            stat.put(headers[2], String.format("%3d", (int)(percentage * 100)))
+            stat.put(headers[1], String.format("%${Integer.toString(maxNumMembersInAnyCategory).length()}d", members.size()))
+            stat.put(headers[2], String.format("%3d", (int) (percentage * 100)))
             stats << stat
         }
+        stats
+    }
 
-        return stats
+
+    private int calculateTheTotalNumberOfMembers() {
+        int totalNumMembers = 0
+        data.values().each { List<Member> members -> totalNumMembers += members.size() }
+        totalNumMembers
+    }
+
+
+    private int calculateTheMaximumNumberOfMembersInAnyCategory() {
+        int maxNumMembersInAnyCategory = 0
+        data.values().each { List<Member> members ->
+            if (maxNumMembersInAnyCategory < members.size()) maxNumMembersInAnyCategory = members.size()
+        }
+        maxNumMembersInAnyCategory
     }
 
 
