@@ -1,19 +1,28 @@
 package org.greenvilleoaks
 
 import com.google.maps.model.DistanceMatrix
+import com.google.maps.model.DistanceMatrixElement
+import com.google.maps.model.DistanceMatrixElementStatus
 import com.google.maps.model.GeocodingResult
 import groovy.util.logging.Log4j
+import org.greenvilleoaks.view.View
 
 @Log4j
 final class Geodedic {
     private final String centralAddress
     private final List<Member> geodedicMembers
     private final Google google
+    private final View roleView
 
-    public Geodedic(final String centralAddress, List<Member> geodedicMembers, Google google) {
+    public Geodedic(
+            final String centralAddress,
+            final List<Member> geodedicMembers,
+            final Google google,
+            final View roleView) {
         this.centralAddress  = centralAddress
         this.geodedicMembers = geodedicMembers
         this.google          = google
+        this.roleView        = roleView
     }
 
 
@@ -28,11 +37,16 @@ final class Geodedic {
 
         // Geocode any addresses that were missing from the Geodedic CSV file
         members.each { Member member ->
-            Member geodedicInfo = findMemberGeodedic(member, geodedicMembers)
+            Member geodedicInfo = findGeodedicInfo4Address(member, geodedicMembers)
             if (!geodedicInfo) {
+                // Obtain the geodedic data about the member
                 geocode(member)
-                addDistance(member)
+                addDistance(member, centralAddress)
 
+                // Add the address' geodedic information so that subsequent
+                // members at the same address or subsequent runs of the
+                // program won't have to use the Google APIs that are both
+                // slow and have limits on their usage.
                 geodedicMembers <<  member
             }
             else {
@@ -46,6 +60,8 @@ final class Geodedic {
                 member.commuteDistance2CentralPointHumanReadable = geodedicInfo.commuteDistance2CentralPointHumanReadable
                 member.commuteTime2CentralPointInSeconds         = geodedicInfo.commuteTime2CentralPointInSeconds
                 member.commuteTime2CentralPointHumanReadable     = geodedicInfo.commuteTime2CentralPointHumanReadable
+
+                // TODO: Add memberRoleCommute
             }
         }
 
@@ -71,38 +87,53 @@ final class Geodedic {
     }
 
 
-    private void addDistance(Member member) {
-        DistanceMatrix distanceMatrix = google.distanceMatrix(member.fullAddress, centralAddress)
+    private void addDistance(Member member, String destinationAddress) {
+        DistanceMatrixElement distanceMatrixElement = findDistance(member, destinationAddress)
 
-        if (!distanceMatrix || !distanceMatrix.rows ||
-                (distanceMatrix.rows.size() == 0) ||
-                (distanceMatrix.rows[0].elements.size() == 0)) {
-            log.error("Can't find distance from '$member.fullAddress' to '$centralAddress'")
+        if (distanceMatrixElement) {
+            member.commuteDistance2CentralPointInMeters      = distanceMatrixElement.distance.inMeters
+            member.commuteDistance2CentralPointHumanReadable = distanceMatrixElement.distance.humanReadable
 
-        }
-        else if (distanceMatrix && distanceMatrix.rows && distanceMatrix.rows.size() > 1) {
-            log.error("${distanceMatrix.rows.size()} distance matrix rows were found from '$member.fullAddress' to '$centralAddress'")
-        }
-        else if (distanceMatrix && distanceMatrix.rows && distanceMatrix.rows[0].elements.size() > 1) {
-            log.error("${distanceMatrix.rows[0].elements.size()} distance matrix elements were found from '$member.fullAddress' to '$centralAddress'")
-        }
-        else {
-            member.commuteDistance2CentralPointInMeters      = distanceMatrix.rows[0].elements[0].distance.inMeters
-            member.commuteDistance2CentralPointHumanReadable = distanceMatrix.rows[0].elements[0].distance.humanReadable
-
-            member.commuteTime2CentralPointInSeconds         = distanceMatrix.rows[0].elements[0].duration.inSeconds
-            member.commuteTime2CentralPointHumanReadable     = distanceMatrix.rows[0].elements[0].duration.humanReadable
+            member.commuteTime2CentralPointInSeconds         = distanceMatrixElement.duration.inSeconds
+            member.commuteTime2CentralPointHumanReadable     = distanceMatrixElement.duration.humanReadable
         }
     }
 
 
-    private static Member findMemberGeodedic(
-            final Member member,
+    private DistanceMatrixElement findDistance(Member member, String destinationAddress) {
+        DistanceMatrix distanceMatrix = google.distanceMatrix(member.fullAddress, destinationAddress)
+
+        if (!distanceMatrix || !distanceMatrix.rows ||
+                (distanceMatrix.rows.size() == 0) ||
+                (distanceMatrix.rows[0].elements.size() == 0)) {
+            log.error("Can't find distance from '$member.fullAddress' to '$destinationAddress'")
+        }
+        else if (distanceMatrix && distanceMatrix.rows && distanceMatrix.rows.size() > 1) {
+            log.error("${distanceMatrix.rows.size()} distance matrix rows were found from '$member.fullAddress' to '$destinationAddress'")
+        }
+        else if (distanceMatrix && distanceMatrix.rows && distanceMatrix.rows[0].elements.size() > 1) {
+            log.error("${distanceMatrix.rows[0].elements.size()} distance matrix elements were found from '$member.fullAddress' to '$destinationAddress'")
+        }
+        else if (distanceMatrix && distanceMatrix.rows && distanceMatrix.rows[0].elements[0].status != DistanceMatrixElementStatus.OK ) {
+            log.error("${distanceMatrix.rows[0].elements.size()} distance matrix elements were found from '$member.fullAddress' to '$destinationAddress'")
+        }
+        else {
+            return distanceMatrix.rows[0].elements[0]
+        }
+
+        return null
+    }
+
+
+
+
+    private static Member findGeodedicInfo4Address(
+            final Member memberToBeFound,
             final List<Member> members) {
         return members.find {
-            member.address.equals(it.address) &&
-            member.city.equals(it.city) &&
-            member.zip.equals(it.zip)
+            memberToBeFound.address.equals(it.address) &&
+            memberToBeFound.city.equals(it.city) &&
+            memberToBeFound.zip.equals(it.zip)
         }
     }
 }

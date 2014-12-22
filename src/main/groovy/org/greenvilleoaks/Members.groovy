@@ -1,6 +1,8 @@
 package org.greenvilleoaks
 
 import groovy.util.logging.Log4j
+import org.greenvilleoaks.view.RoleView
+import org.greenvilleoaks.view.View
 
 @Log4j
 public final class Members {
@@ -13,8 +15,11 @@ public final class Members {
     public List<Member> createMembers() {
         List<Member> members      = loadMembers()
         List<Member> geodedicInfo = loadGeodedicInfo()
-        geocodeMembers(members, geodedicInfo)
+
+        createGeodedicInfo4Members(members, geodedicInfo)
+
         storeGeodedicInfo(geodedicInfo)
+
         return members
     }
 
@@ -89,11 +94,16 @@ public final class Members {
     /**
      * @return The create with geodedic information
      */
-    private void geocodeMembers(final List<Member> members, final List<Member> geodedicInfo) {
+    private void createGeodedicInfo4Members(final List<Member> members, final List<Member> geodedicInfo) {
         config.context.apiKey = config.apiKey
 
-        Geodedic geocode = new Geodedic(config.centralAddress, geodedicInfo, new Google(config.context))
+        Geodedic geodedic = new Geodedic(
+                config.centralPointAddress,
+                geodedicInfo,
+                new Google(config.context),
+                new RoleView(config.propertyNames.role, members)
+        )
 
-        geocode.create(members)
+        geodedic.create(members)
     }
 }

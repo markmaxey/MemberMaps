@@ -57,5 +57,8 @@ class Config {
 
     public final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("M/d/yyyy")
 
-    public final String centralAddress = "703 South Greenville Avenue, Allen, TX 75002"
+    public final String centralPointName    = "Greenville Oaks Church of Christ"
+    public final String centralPointAddress = "703 South Greenville Avenue, Allen, TX 75002"
+
+    public final List<String> memberRoleCommute = ["Small Group Leader"]
 }

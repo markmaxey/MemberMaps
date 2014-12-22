@@ -20,9 +20,9 @@ class MemberMap {
 
         List<Member> members = new Members(config).createMembers()
 
-        List<View> views = createViews(members)
+        Map<String, View> views = createViews(members)
 
-        createStatSpreadsheet(views, members)
+        createStatSpreadsheet(views.values(), members)
     }
 
 
@@ -32,17 +32,17 @@ class MemberMap {
      * @param members
      * @return various perspectives of the create
      */
-    private static List<View> createViews(final List<Member> members) {
-        List<View> views = []
+    private static Map<String, View> createViews(final List<Member> members) {
+        Map<String, View> views = [:]
 
-        views << new CityView(config.propertyNames.city, members)
-        views << new ZipView(config.propertyNames.zip, members)
-        views << new NumInHouseholdView(config.propertyNames.numInHousehold, members)
-        views << new AgeView(config.propertyNames.age, members)
-        views << new GradeView(config.propertyNames.grade, members)
-        views << new RoleView(config.propertyNames.role, members)
-        views << new DistanceView("Commute Distance in Miles", members)
-        views << new DurationView("Commute Time in Minutes", members)
+        views.put(config.propertyNames.city,           new CityView(config.propertyNames.city, members))
+        views.put(config.propertyNames.zip,            new ZipView(config.propertyNames.zip, members))
+        views.put(config.propertyNames.numInHousehold, new NumInHouseholdView(config.propertyNames.numInHousehold, members))
+        views.put(config.propertyNames.age,            new AgeView(config.propertyNames.age, members))
+        views.put(config.propertyNames.grade,          new GradeView(config.propertyNames.grade, members))
+        views.put(config.propertyNames.role,           new RoleView(config.propertyNames.role, members))
+        views.put("Commute Distance in Miles",         new DistanceView("Commute Distance in Miles", members))
+        views.put("Commute Time in Minutes",           new DurationView("Commute Time in Minutes", members))
 
         return views
     }
@@ -52,7 +52,7 @@ class MemberMap {
      * Dump all the perspectives of the create to an Excel workbook
      * @param views
      */
-    private static void createStatSpreadsheet(List<View> views, final List<Member> members) {
+    private static void createStatSpreadsheet(Collection<View> views, final List<Member> members) {
         List<Map<String, String>> membersListMap = []
         members.each { Member member -> membersListMap << member.toMap(config.propertyNames) }
 
