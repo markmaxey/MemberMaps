@@ -9,21 +9,31 @@ import org.greenvilleoaks.view.View
 
 @Log4j
 final class Geodedic {
+    /** The address of a central location we want to find the distance to for each member */
     private final String centralAddress
-    private final List<Member> geodedicMembers
-    private final Google google
-    private final View roleView
 
+    /** Cached geodedic information for addresses (not fully populated with member info) */
+    private final List<Member> geodedicAddresses
+
+    /** A wrapper around the Google APIs */
+    private final Google google
+
+
+    /**
+     * Constructor
+     * @param centralAddress       The address of a central location we want to find the distance to for each member
+     * @param geodedicAddresses    Cached geodedic information for addresses (not fully populated with member info)
+     * @param google               A wrapper around the Google APIs
+     */
     public Geodedic(
             final String centralAddress,
-            final List<Member> geodedicMembers,
-            final Google google,
-            final View roleView) {
-        this.centralAddress  = centralAddress
-        this.geodedicMembers = geodedicMembers
-        this.google          = google
-        this.roleView        = roleView
+            final List<Member> geodedicAddresses,
+            final Google google) {
+        this.centralAddress    = centralAddress
+        this.geodedicAddresses = geodedicAddresses
+        this.google            = google
     }
+
 
 
     /**
@@ -31,23 +41,30 @@ final class Geodedic {
      * Any geodedic information will be persisted to a file to optimize subsequent uses.
      *
      * @param members The list of members
+     * @param roleView             A perspective of all members where each role has a list of members
+     * @param memberRoleCommute    The shortest commute will be found for each member to another member in each of these roles.
      */
-    public void create(final List<Member> members) {
+    public void create(
+            final List<Member> members,
+            final View roleView,
+            final List<String> memberRoleCommute) {
         log.info("Geocoding members addresses ...")
 
         // Geocode any addresses that were missing from the Geodedic CSV file
         members.each { Member member ->
-            Member geodedicInfo = findGeodedicInfo4Address(member, geodedicMembers)
+            Member geodedicInfo = findGeodedicInfo4Address(member, geodedicAddresses)
             if (!geodedicInfo) {
                 // Obtain the geodedic data about the member
+                log.info("Creating geocoding information for " + member)
                 geocode(member)
                 addDistance(member, centralAddress)
+                addDistancesFromMembers2Roles(member, roleView, memberRoleCommute)
 
                 // Add the address' geodedic information so that subsequent
                 // members at the same address or subsequent runs of the
                 // program won't have to use the Google APIs that are both
                 // slow and have limits on their usage.
-                geodedicMembers <<  member
+                geodedicAddresses <<  member
             }
             else {
                 // Having loaded the persistent information from a file instead of asking Google for it,
@@ -61,13 +78,66 @@ final class Geodedic {
                 member.commuteTime2CentralPointInSeconds         = geodedicInfo.commuteTime2CentralPointInSeconds
                 member.commuteTime2CentralPointHumanReadable     = geodedicInfo.commuteTime2CentralPointHumanReadable
 
-                // TODO: Add memberRoleCommute
+                memberRoleCommute.each { String role ->
+                    member.setProperty("Minimum Commute Distance In Meters to " + role, geodedicInfo.getProperty("Minimum Commute Distance In Meters to " + role))
+                    member.setProperty("Minimum Commute Distance to " + role          , geodedicInfo.getProperty("Minimum Commute Distance to " + role))
+                    member.setProperty("Minimum Commute Time In Seconds to " + role   , geodedicInfo.getProperty("Minimum Commute Time In Seconds to " + role))
+                    member.setProperty("Minimum Commute Time to " + role              , geodedicInfo.getProperty("Minimum Commute Time to " + role))
+                    member.setProperty("Minimum Commute to " + role                   , geodedicInfo.getProperty("Minimum Commute to " + role))
+                }
             }
         }
 
         log.info("Finished geocoding members addresses")
     }
 
+
+
+    /**
+     * Some members fill a certain role (e.g, small group leader, staff, etc.).  This method will add distance
+     * information to the given member for the shortest commute from the given member to any member in a given role.
+     * Only the roles specified in memberRoleCommute will be used.
+     *
+     * @param members              A member
+     * @param roleView             A perspective of all members where each role has a list of members
+     * @param memberRoleCommute    The shortest commute will be found for each member to another member in each of these roles.
+     */
+    private void addDistancesFromMembers2Roles(
+            final Member member,
+            final View roleView,
+            final List<String> memberRoleCommute) {
+        // For each role that we care about
+        memberRoleCommute.each { String role ->
+            Member minMember = null
+            DistanceMatrixElement minDistance  = null
+
+            // Create a list of members in that role
+            List<Member> membersInARole = roleView.data.get(role)
+
+            // Determine which member in the role lives closest to the given member
+            log.info("Calculating distance from " + member.firstName + " " + member.lastName + " to all " +
+                    membersInARole.size() + " members in role " + role)
+            membersInARole.each { Member memberInARole ->
+                // Skip members that live in the same household
+                if (member.fullAddress != memberInARole.fullAddress) {
+                    DistanceMatrixElement distanceMatrixElement = findDistance(member, memberInARole.fullAddress)
+
+                    if ((minDistance == null) ||
+                            (minDistance.distance.inMeters > distanceMatrixElement.distance.inMeters)) {
+                        minMember   = memberInARole
+                        minDistance = distanceMatrixElement
+                    }
+                }
+            }
+            log.info("The closest $role to '$minMember.fullName' is '$member.fullName'")
+
+            member.setProperty("Minimum Commute Distance In Meters to " + role, minDistance.distance.inMeters)
+            member.setProperty("Minimum Commute Distance to " + role,           minDistance.distance.humanReadable)
+            member.setProperty("Minimum Commute Time In Seconds to " + role,    minDistance.duration.inSeconds)
+            member.setProperty("Minimum Commute Time to " + role,               minDistance.duration.humanReadable)
+            member.setProperty("Minimum Commute to " + role,                    minMember.fullName)
+        }
+    }
 
 
     private void geocode(Member member) {

@@ -56,7 +56,7 @@ abstract class View {
         List<Map<String, String>> stats = []
         data.each { String category, List<Member> members ->
             double percentage = (double) members.size() / (double) totalNumMembers
-            Map<String, String> stat = new TreeMap<String, String>()
+            Map<String, String> stat = new LinkedHashMap<String, String>()
             stat.put(headers[0], category)
             stat.put(headers[1], String.format("%${Integer.toString(maxNumMembersInAnyCategory).length()}d", members.size()))
             stat.put(headers[2], String.format("%3d", (int) (percentage * 100)))

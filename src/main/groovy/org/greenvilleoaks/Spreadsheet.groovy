@@ -65,7 +65,7 @@ final class Spreadsheet {
             headerCell.setCellStyle(styles.get("header"));
 
             // Set the cell width based on the width of the column header
-            sheet.setColumnWidth(i, headers[i].size()*256);
+            sheet.setColumnWidth(i, headers[i].length()*256);
         }
     }
 

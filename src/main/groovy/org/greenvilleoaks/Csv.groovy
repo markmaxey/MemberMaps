@@ -7,7 +7,7 @@ import org.supercsv.io.ICsvMapWriter
 import org.supercsv.prefs.CsvPreference
 
 final class Csv {
-    private final String[] header
+    private final List<String> header
     private final String fileName
 
     /**
@@ -26,7 +26,7 @@ final class Csv {
      * @param fileName The name of the CSV file
      * @param header The headers to use if the file doesn't exist
      */
-    public Csv(final String fileName, final String[] header) {
+    public Csv(final String fileName, final List<String> header) {
         this.fileName = fileName
         if (new File(fileName).exists()) {
             this.header = extractHeader()
@@ -39,8 +39,8 @@ final class Csv {
     /**
      * @return the headers from the CSV file if it exists or null if it doesn't
      */
-    private String[] extractHeader() {
-        String[] hdr = null
+    private List<String> extractHeader() {
+        List<String> hdr = null
         ICsvMapReader mapReader = null;
         try {
             mapReader = new CsvMapReader(new FileReader(fileName), CsvPreference.STANDARD_PREFERENCE);
@@ -67,7 +67,7 @@ final class Csv {
 
             List<Map<String, String>> members = []
             Map<String, String> member;
-            while( (member = mapReader.read(header)) != null ) {
+            while( (member = mapReader.read((String[])header.toArray())) != null ) {
                 boolean blankRow = true;
                 member.values().each { if (it != null) blankRow = false}
                 if (!blankRow) members << member
@@ -91,8 +91,8 @@ final class Csv {
         ICsvMapWriter mapWriter = null;
         try {
             mapWriter = new CsvMapWriter(new FileWriter(fileName), CsvPreference.STANDARD_PREFERENCE)
-            mapWriter.writeHeader(header)
-            listOfMaps.each {mapWriter.write(it, header)}
+            mapWriter.writeHeader((String[])header.toArray())
+            listOfMaps.each {mapWriter.write(it, (String[])header.toArray())}
         }
         finally {
             if( mapWriter != null ) mapWriter.close();

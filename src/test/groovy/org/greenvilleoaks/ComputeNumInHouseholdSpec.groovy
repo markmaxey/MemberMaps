@@ -3,7 +3,7 @@ package org.greenvilleoaks
 import spock.lang.Shared
 import spock.lang.Specification
 
-class ComputeNumInHousehold extends Specification {
+class ComputeNumInHouseholdSpec extends Specification {
     @Shared Config config = new Config()
 
     private List<Member> memberList(final String key, final List<String> values) {
@@ -11,7 +11,7 @@ class ComputeNumInHousehold extends Specification {
         values.each { String value ->
             Map<String, String> memberMap = [:]
             memberMap.put(key, value)
-            memberList << new Member(memberMap, config.propertyNames, config.dateFormatter)
+            memberList << new Member(memberMap, config.propertyNames, config.dateFormatter, config.memberRoleCommute)
         }
         return memberList
     }

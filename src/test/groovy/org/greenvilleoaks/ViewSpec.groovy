@@ -22,7 +22,7 @@ class ViewSpec extends Specification {
         values.each { String value ->
             Map<String, String> memberMap = [:]
             memberMap.put(key, value)
-            memberList << new Member(memberMap, config.propertyNames, config.dateFormatter)
+            memberList << new Member(memberMap, config.propertyNames, config.dateFormatter, config.memberRoleCommute)
         }
         return memberList
     }

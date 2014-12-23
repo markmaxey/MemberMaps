@@ -39,7 +39,7 @@ class MemberSpec extends Specification {
                 "Commute Time": "99 minutes"
         ]
 
-        Member member = new Member(memberMap, config.propertyNames, config.dateFormatter)
+        Member member = new Member(memberMap, config.propertyNames, config.dateFormatter, config.memberRoleCommute)
 
         expect:
         member.address == memberMap."Address"
@@ -86,7 +86,7 @@ class MemberSpec extends Specification {
     def "Empty Map"() {
         setup:
         Map<String, String> memberMap = [:]
-        Member member = new Member(memberMap, config.propertyNames, config.dateFormatter)
+        Member member = new Member(memberMap, config.propertyNames, config.dateFormatter, config.memberRoleCommute)
 
         expect:
         member.address == null
@@ -134,7 +134,7 @@ class MemberSpec extends Specification {
                 "Address" : address,
                 "City"    : city,
                 "Zip Code": zip
-        ], config.propertyNames, config.dateFormatter)
+        ], config.propertyNames, config.dateFormatter, config.memberRoleCommute)
 
         member.fullAddress == fullAddress
 

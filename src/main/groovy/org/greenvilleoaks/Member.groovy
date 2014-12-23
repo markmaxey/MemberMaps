@@ -7,7 +7,7 @@ import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
 
-@ToString
+@ToString(includeNames = true, includeFields = true)
 @EqualsAndHashCode
 public final class Member {
     final String     fullName
@@ -32,6 +32,7 @@ public final class Member {
     String commuteTime2CentralPointHumanReadable
 
     final DateTimeFormatter dateFormatter
+    final List<String> memberRoleCommute
 
 
     /**
@@ -40,12 +41,15 @@ public final class Member {
      * @param memberMap A map where the keys are the values in the propertyNames map and the values are the values of the bean
      * @param propertyNames A map where the keys are the property names of the bean and the values are the keys in the memberMap
      * @param dateFormatter A date formatter (for the birthday)
+     * @param memberRoleCommute A list of roles that should be used to compute the minimum distance from a member to any member in that role
      */
     public Member(
             final Map<String, String> memberMap,
             final Map<String, String> propertyNames,
-            final DateTimeFormatter dateFormatter) {
-        this.dateFormatter    = dateFormatter
+            final DateTimeFormatter dateFormatter,
+            final List<String> memberRoleCommute) {
+        this.dateFormatter     = dateFormatter
+        this.memberRoleCommute = memberRoleCommute
 
         fullName              = memberMap.get(propertyNames.fullName)
         lastName              = memberMap.get(propertyNames.lastName)
@@ -88,6 +92,16 @@ public final class Member {
         else {
             fullAddress = null
         }
+
+
+        // Initialize the dynamic properties driven by the roles
+        memberRoleCommute.each { String role ->
+            this.metaClass.("Minimum Commute Distance In Meters to " + role) = memberMap.get("Minimum Commute Distance In Meters to " + role)
+            this.metaClass.("Minimum Commute Distance to " + role)           = memberMap.get("Minimum Commute Distance to " + role)
+            this.metaClass.("Minimum Commute Time In Seconds to " + role)    = memberMap.get("Minimum Commute Time In Seconds to " + role)
+            this.metaClass.("Minimum Commute Time to " + role)               = memberMap.get("Minimum Commute Time to " + role)
+            this.metaClass.("Minimum Commute to " + role)                    = memberMap.get("Minimum Commute to " + role)
+        }
     }
 
 
@@ -96,7 +110,7 @@ public final class Member {
      * @return A member map where the keys are the values of the propertyNames and the values are the property values of the member bean
      */
     public Map<String, String> toMap(Map<String, String> propertyNames) {
-        Map<String, String> map = new TreeMap<String, String>()
+        Map<String, String> map = new LinkedHashMap<String, String>()
 
         map.put(propertyNames.get("fullName"), fullName)
         map.put(propertyNames.get("lastName"), lastName)
@@ -122,6 +136,14 @@ public final class Member {
 
         map.put(propertyNames.get("commuteTime2CentralPointInSeconds"), valueOf(commuteTime2CentralPointInSeconds))
         map.put(propertyNames.get("commuteTime2CentralPointHumanReadable"), commuteTime2CentralPointHumanReadable)
+
+        memberRoleCommute.each { String role ->
+            map.put("Minimum Commute Distance In Meters to " + role, this.("Minimum Commute Distance In Meters to " + role))
+            map.put("Minimum Commute Distance to " + role,           this.("Minimum Commute Distance to " + role))
+            map.put("Minimum Commute Time In Seconds to " + role,    this.("Minimum Commute Time In Seconds to " + role))
+            map.put("Minimum Commute Time to " + role,               this.("Minimum Commute Time to " + role))
+            map.put("Minimum Commute to " + role,                    this.("Minimum Commute to " + role))
+        }
 
         return map
     }

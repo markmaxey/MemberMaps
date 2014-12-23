@@ -2,7 +2,6 @@ package org.greenvilleoaks
 
 import groovy.util.logging.Log4j
 import org.greenvilleoaks.view.RoleView
-import org.greenvilleoaks.view.View
 
 @Log4j
 public final class Members {
@@ -14,11 +13,11 @@ public final class Members {
 
     public List<Member> createMembers() {
         List<Member> members      = loadMembers()
-        List<Member> geodedicInfo = loadGeodedicInfo()
+        List<Member> geodedicAddresses = loadGeodedicAddresses()
 
-        createGeodedicInfo4Members(members, geodedicInfo)
+        createGeodedicInfo4Members(members, geodedicAddresses)
 
-        storeGeodedicInfo(geodedicInfo)
+        storeGeodedicInfo(geodedicAddresses)
 
         return members
     }
@@ -28,7 +27,7 @@ public final class Members {
         List<Member> members = []
 
         new Csv(config.membersCsvFileName).load().each {
-            members << new Member(it, config.propertyNames, config.dateFormatter)
+            members << new Member(it, config.propertyNames, config.dateFormatter, config.memberRoleCommute)
         }
 
         log.info("Loaded ${members.size()} members")
@@ -64,12 +63,12 @@ public final class Members {
     }
 
 
-    private List<Member> loadGeodedicInfo() {
+    private List<Member> loadGeodedicAddresses() {
         log.info("Loading cached geodedic information from '$config.geodedicCsvFileName' ...")
         List<Member> members = []
 
         new Csv(config.geodedicCsvFileName, config.geodedicCsvHeaders).load().each {
-            members << new Member(it, config.propertyNames, config.dateFormatter)
+            members << new Member(it, config.propertyNames, config.dateFormatter, config.memberRoleCommute)
         }
 
         log.info("Loaded ${members.size()} addresses with geodedic information")
@@ -94,16 +93,19 @@ public final class Members {
     /**
      * @return The create with geodedic information
      */
-    private void createGeodedicInfo4Members(final List<Member> members, final List<Member> geodedicInfo) {
+    private void createGeodedicInfo4Members(final List<Member> members, final List<Member> geodedicAddresses) {
         config.context.apiKey = config.apiKey
 
         Geodedic geodedic = new Geodedic(
                 config.centralPointAddress,
-                geodedicInfo,
+                geodedicAddresses,
                 new Google(config.context),
-                new RoleView(config.propertyNames.role, members)
         )
 
-        geodedic.create(members)
+        geodedic.create(
+                members,
+                new RoleView(config.propertyNames.role, members),
+                config.memberRoleCommute
+        )
     }
 }
