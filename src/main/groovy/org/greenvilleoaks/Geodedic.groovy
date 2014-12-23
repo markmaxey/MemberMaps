@@ -12,9 +12,6 @@ final class Geodedic {
     /** The address of a central location we want to find the distance to for each member */
     private final String centralAddress
 
-    /** Cached geodedic information for addresses (not fully populated with member info) */
-    private final List<Member> geodedicAddresses
-
     /** A wrapper around the Google APIs */
     private final Google google
 
@@ -27,68 +24,124 @@ final class Geodedic {
      */
     public Geodedic(
             final String centralAddress,
-            final List<Member> geodedicAddresses,
             final Google google) {
         this.centralAddress    = centralAddress
-        this.geodedicAddresses = geodedicAddresses
         this.google            = google
     }
 
 
 
     /**
-     * Add geodedic information (latitude, longitude, & Distance from a central point) to the create list.
-     * Any geodedic information will be persisted to a file to optimize subsequent uses.
+     * Add geodedic information (latitude, longitude, & Distance from a central point) to geodedicAddresses
      *
-     * @param members The list of members
+     * @param members              The list of members
      * @param roleView             A perspective of all members where each role has a list of members
      * @param memberRoleCommute    The shortest commute will be found for each member to another member in each of these roles.
+     * @param geodedicAddresses    In/Out: Geodedic information for addresses (not fully populated with member info).
+     *                             This list can be prepopulated with cached results.  It will be updated with all
+     *                             the geodedic information for all addresses of all members.
      */
     public void create(
             final List<Member> members,
             final View roleView,
-            final List<String> memberRoleCommute) {
+            final List<String> memberRoleCommute,
+            final List<Member> geodedicAddresses) {
         log.info("Geocoding members addresses ...")
 
         // Geocode any addresses that were missing from the Geodedic CSV file
         members.each { Member member ->
-            Member geodedicInfo = findGeodedicInfo4Address(member, geodedicAddresses)
-            if (!geodedicInfo) {
-                // Obtain the geodedic data about the member
-                log.info("Creating geocoding information for " + member)
-                geocode(member)
-                addDistance(member, centralAddress)
-                addDistancesFromMembers2Roles(member, roleView, memberRoleCommute)
-
-                // Add the address' geodedic information so that subsequent
-                // members at the same address or subsequent runs of the
-                // program won't have to use the Google APIs that are both
-                // slow and have limits on their usage.
-                geodedicAddresses <<  member
-            }
-            else {
-                // Having loaded the persistent information from a file instead of asking Google for it,
-                // save this information in the member
-                member.latitude         = geodedicInfo.latitude
-                member.longitude        = geodedicInfo.longitude
-                member.formattedAddress = geodedicInfo.formattedAddress
-
-                member.commuteDistance2CentralPointInMeters      = geodedicInfo.commuteDistance2CentralPointInMeters
-                member.commuteDistance2CentralPointHumanReadable = geodedicInfo.commuteDistance2CentralPointHumanReadable
-                member.commuteTime2CentralPointInSeconds         = geodedicInfo.commuteTime2CentralPointInSeconds
-                member.commuteTime2CentralPointHumanReadable     = geodedicInfo.commuteTime2CentralPointHumanReadable
-
-                memberRoleCommute.each { String role ->
-                    member.setProperty("Minimum Commute Distance In Meters to " + role, geodedicInfo.getProperty("Minimum Commute Distance In Meters to " + role))
-                    member.setProperty("Minimum Commute Distance to " + role          , geodedicInfo.getProperty("Minimum Commute Distance to " + role))
-                    member.setProperty("Minimum Commute Time In Seconds to " + role   , geodedicInfo.getProperty("Minimum Commute Time In Seconds to " + role))
-                    member.setProperty("Minimum Commute Time to " + role              , geodedicInfo.getProperty("Minimum Commute Time to " + role))
-                    member.setProperty("Minimum Commute to " + role                   , geodedicInfo.getProperty("Minimum Commute to " + role))
-                }
-            }
+            create(member, roleView, memberRoleCommute, geodedicAddresses)
         }
 
         log.info("Finished geocoding members addresses")
+    }
+
+
+
+    /**
+     * Add geodedic information (latitude, longitude, & Distance from a central point) to geodedicAddresses
+     *
+     * @param members              A member
+     * @param roleView             A perspective of all members where each role has a list of members
+     * @param memberRoleCommute    The shortest commute will be found for each member to another member in each of these roles.
+     * @param geodedicAddresses    In/Out: Geodedic information for addresses (not fully populated with member info).
+     *                             This list can be prepopulated with cached results.  It will be updated with all
+     *                             the geodedic information for all addresses of all members.
+     */
+    public void create(
+            final Member member,
+            final View roleView,
+            final List<String> memberRoleCommute,
+            final List<Member> geodedicAddresses) {
+        Member geodedicInfo
+        synchronized (geodedicAddresses) {
+            geodedicInfo = findGeodedicInfo4Address(member, geodedicAddresses)
+        }
+        if (!geodedicInfo) {
+            createGeodedicInfo4AMember(member, roleView, memberRoleCommute)
+
+            // Add the address' geodedic information so that subsequent
+            // members at the same address or subsequent runs of the
+            // program won't have to use the Google APIs that are both
+            // slow and have limits on their usage.
+            synchronized (geodedicAddresses) {
+                geodedicAddresses << member
+            }
+        }
+        else {
+            addCachedGeodedicInfo2Member(memberRoleCommute, geodedicInfo, member)
+        }
+    }
+
+
+
+   /**
+     * Create the geodedic information for the address of a member.
+     *
+     * @param members              A member whose geodedic information will be updated by this method
+     * @param roleView             A perspective of all members where each role has a list of members
+     * @param memberRoleCommute    The shortest commute will be found for each member to another member in each of these roles.
+     */
+    private void createGeodedicInfo4AMember(
+            final Member member,
+            final View roleView,
+            final List<String> memberRoleCommute) {
+        log.info("Creating geocoding information for " + member)
+        geocode(member)
+        addDistance(member, centralAddress)
+        addDistancesFromMembers2Roles(member, roleView, memberRoleCommute)
+    }
+
+
+
+    /**
+     * Having loaded the persistent information from a file instead of asking Google for it,
+     * save this information in the member.
+     *
+     * @param memberRoleCommute    The shortest commute will be found for each member to another member in each of these roles.
+     * @param geodedicInfo         Cached geodedic information about an address of a member
+     * @param member               The member to update with the geodedic information
+     */
+    private void addCachedGeodedicInfo2Member(
+            final List<String> memberRoleCommute,
+            final Member geodedicInfo,
+            final Member member) {
+        member.latitude         = geodedicInfo.latitude
+        member.longitude        = geodedicInfo.longitude
+        member.formattedAddress = geodedicInfo.formattedAddress
+
+        member.commuteDistance2CentralPointInMeters      = geodedicInfo.commuteDistance2CentralPointInMeters
+        member.commuteDistance2CentralPointHumanReadable = geodedicInfo.commuteDistance2CentralPointHumanReadable
+        member.commuteTime2CentralPointInSeconds         = geodedicInfo.commuteTime2CentralPointInSeconds
+        member.commuteTime2CentralPointHumanReadable     = geodedicInfo.commuteTime2CentralPointHumanReadable
+
+        memberRoleCommute.each { String role ->
+            member.setProperty("Minimum Commute Distance In Meters to " + role, geodedicInfo.getProperty("Minimum Commute Distance In Meters to " + role))
+            member.setProperty("Minimum Commute Distance to " + role,           geodedicInfo.getProperty("Minimum Commute Distance to " + role))
+            member.setProperty("Minimum Commute Time In Seconds to " + role,    geodedicInfo.getProperty("Minimum Commute Time In Seconds to " + role))
+            member.setProperty("Minimum Commute Time to " + role,               geodedicInfo.getProperty("Minimum Commute Time to " + role))
+            member.setProperty("Minimum Commute to " + role,                    geodedicInfo.getProperty("Minimum Commute to " + role))
+        }
     }
 
 

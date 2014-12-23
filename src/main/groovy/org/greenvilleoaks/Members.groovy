@@ -98,14 +98,14 @@ public final class Members {
 
         Geodedic geodedic = new Geodedic(
                 config.centralPointAddress,
-                geodedicAddresses,
                 new Google(config.context),
         )
 
         geodedic.create(
                 members,
                 new RoleView(config.propertyNames.role, members),
-                config.memberRoleCommute
+                config.memberRoleCommute,
+                geodedicAddresses
         )
     }
 }
