@@ -1,7 +1,13 @@
 package org.greenvilleoaks
 
+import com.google.api.client.http.javanet.NetHttpTransport
+import com.google.api.client.json.gson.GsonFactory
 import groovy.util.logging.Log4j
+import org.greenvilleoaks.map.Workflow
 import org.greenvilleoaks.view.*
+
+import java.util.logging.Level
+import java.util.logging.LogManager
 
 /**
  * This is the "main" class containing all the control logic.
@@ -15,6 +21,8 @@ class MemberMap {
      * @param argv
      */
     public static void main(final String[] argv) {
+//        LogManager.getLogManager().getLogger("").getHandlers().each { it.setLevel(Level.FINEST ) }
+        
         log.info("Generating a members map and spreadsheet ...")
         log.info(config.toString())
 
@@ -23,6 +31,15 @@ class MemberMap {
         Map<String, View> views = createViews(members)
 
         createStatSpreadsheet(views.values(), members)
+
+        new Workflow(
+                members,
+                views,
+                new NetHttpTransport(),
+                new GsonFactory(),
+                config.propertyNames,
+                config.applicationName,
+                new File(config.jsonKeyFileName)).run(config.projectId)
     }
 
 

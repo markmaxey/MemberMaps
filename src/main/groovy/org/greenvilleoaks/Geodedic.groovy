@@ -49,9 +49,8 @@ final class Geodedic {
         log.info("Geocoding members addresses ...")
 
         // Geocode any addresses that were missing from the Geodedic CSV file
-        members.each { Member member ->
-            create(member, roleView, memberRoleCommute, geodedicAddresses)
-        }
+        // Use JDK 8 fork/join to work on each member in a different thread in parallel efficiently
+        members.parallelStream().forEach({member -> create(member, roleView, memberRoleCommute, geodedicAddresses)})
 
         log.info("Finished geocoding members addresses")
     }
@@ -73,22 +72,31 @@ final class Geodedic {
             final View roleView,
             final List<String> memberRoleCommute,
             final List<Member> geodedicAddresses) {
+        log.info("Creating geodedic information for '" + member.fullName + "' in thread " + Thread.currentThread().toString())
         Member geodedicInfo
         synchronized (geodedicAddresses) {
             geodedicInfo = findGeodedicInfo4Address(member, geodedicAddresses)
         }
         if (!geodedicInfo) {
-            createGeodedicInfo4AMember(member, roleView, memberRoleCommute)
+            log.info("Geodedic information for '" + member.fullName + "' was NOT cached.  Going to Google to create information from scratch ...")
 
-            // Add the address' geodedic information so that subsequent
-            // members at the same address or subsequent runs of the
-            // program won't have to use the Google APIs that are both
-            // slow and have limits on their usage.
-            synchronized (geodedicAddresses) {
-                geodedicAddresses << member
+            try {
+                createGeodedicInfo4AMember(member, roleView, memberRoleCommute)
+
+                // Add the address' geodedic information so that subsequent
+                // members at the same address or subsequent runs of the
+                // program won't have to use the Google APIs that are both
+                // slow and have limits on their usage.
+                synchronized (geodedicAddresses) {
+                    geodedicAddresses << member
+                }
+            }
+            catch (GoogleException ex) {
+                log.error(ex.message)
             }
         }
         else {
+            log.info("Geodedic information for '" + member.fullName + "' was cached.")
             addCachedGeodedicInfo2Member(memberRoleCommute, geodedicInfo, member)
         }
     }
@@ -106,7 +114,7 @@ final class Geodedic {
             final Member member,
             final View roleView,
             final List<String> memberRoleCommute) {
-        log.info("Creating geocoding information for " + member)
+        log.info("Creating geocoding information for " + member.fullName)
         geocode(member)
         addDistance(member, centralAddress)
         addDistancesFromMembers2Roles(member, roleView, memberRoleCommute)
@@ -172,6 +180,7 @@ final class Geodedic {
                     membersInARole.size() + " members in role " + role)
             membersInARole.each { Member memberInARole ->
                 // Skip members that live in the same household
+                // TODO: Cache the distance information between addresses - this is the most compute intensive part of execution!
                 if (member.fullAddress != memberInARole.fullAddress) {
                     DistanceMatrixElement distanceMatrixElement = findDistance(member, memberInARole.fullAddress)
 
@@ -197,10 +206,10 @@ final class Geodedic {
         GeocodingResult[] results = google.geocode(member.fullAddress)
 
         if (!results || (results.size() == 0)) {
-            log.error("No address was found for '$member.fullAddress'")
+            throw new GoogleException("No address was found for '$member.fullAddress'")
         }
         else if (results && results.size() > 1) {
-            log.error("${results.size()} addresses were found for '$member.fullAddress'")
+            throw new GoogleException("${results.size()} addresses were found for '$member.fullAddress'")
         }
         else {
             member.latitude         = results[0].geometry.location.lat
@@ -228,17 +237,20 @@ final class Geodedic {
 
         if (!distanceMatrix || !distanceMatrix.rows ||
                 (distanceMatrix.rows.size() == 0) ||
-                (distanceMatrix.rows[0].elements.size() == 0)) {
-            log.error("Can't find distance from '$member.fullAddress' to '$destinationAddress'")
+                !distanceMatrix.rows[0] ||
+                !distanceMatrix.rows[0].elements ||
+                (distanceMatrix.rows[0].elements.size() == 0) ||
+                !distanceMatrix.rows[0].elements[0]) {
+            throw new GoogleException("Can't find distance from '$member.fullAddress' to '$destinationAddress'")
         }
         else if (distanceMatrix && distanceMatrix.rows && distanceMatrix.rows.size() > 1) {
-            log.error("${distanceMatrix.rows.size()} distance matrix rows were found from '$member.fullAddress' to '$destinationAddress'")
+            throw new GoogleException("${distanceMatrix.rows.size()} distance matrix rows were found from '$member.fullAddress' to '$destinationAddress'")
         }
         else if (distanceMatrix && distanceMatrix.rows && distanceMatrix.rows[0].elements.size() > 1) {
-            log.error("${distanceMatrix.rows[0].elements.size()} distance matrix elements were found from '$member.fullAddress' to '$destinationAddress'")
+            throw new GoogleException("${distanceMatrix.rows[0].elements.size()} distance matrix elements were found from '$member.fullAddress' to '$destinationAddress'")
         }
         else if (distanceMatrix && distanceMatrix.rows && distanceMatrix.rows[0].elements[0].status != DistanceMatrixElementStatus.OK ) {
-            log.error("${distanceMatrix.rows[0].elements.size()} distance matrix elements were found from '$member.fullAddress' to '$destinationAddress'")
+            throw new GoogleException("${distanceMatrix.rows[0].elements.size()} distance matrix elements were found from '$member.fullAddress' to '$destinationAddress'")
         }
         else {
             return distanceMatrix.rows[0].elements[0]

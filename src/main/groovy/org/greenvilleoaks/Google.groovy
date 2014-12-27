@@ -7,8 +7,8 @@ import com.google.maps.model.DistanceMatrix
 import com.google.maps.model.GeocodingResult
 import com.google.maps.model.Unit
 
-final class Google {
-    private GeoApiContext context
+class Google {
+    private final GeoApiContext context
 
     public Google(GeoApiContext context) {
         this.context = context

@@ -18,6 +18,7 @@ dependencies {
     compile 'org.apache.poi:ooxml-schemas:latest.integration'
     compile 'org.apache.poi:poi-ooxml:latest.integration'
     compile 'com.google.apis:google-api-services-mapsengine:latest.integration'
+    compile 'com.google.maps:mapsengine-api-java-wrapper:latest.integration'
     compile 'net.sf.supercsv:super-csv:latest.integration'
     compile 'org.codehaus.groovy:groovy-all:latest.integration'
     compile 'com.google.maps:google-maps-services:latest.integration'

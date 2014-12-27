@@ -21,6 +21,8 @@ public final class Member {
     final String     grade
     final LocalDate  birthday
     final String     role
+    
+    final String primaryKey
 
     Integer numInHousehold
     String formattedAddress
@@ -92,6 +94,10 @@ public final class Member {
         else {
             fullAddress = null
         }
+        
+
+        // Generate the primary key / unique Id
+        primaryKey = fullAddress + " " + lastName + ", " + firstName + " " + UUID.randomUUID().toString()
 
 
         // Initialize the dynamic properties driven by the roles
@@ -127,6 +133,7 @@ public final class Member {
         map.put(propertyNames.get("age"), valueOf(age))
         map.put(propertyNames.get("grade"), grade)
         map.put(propertyNames.get("role"), role)
+        map.put(propertyNames.get("primaryKey"), primaryKey)
 
         map.put(propertyNames.get("latitude"),  valueOf(latitude))
         map.put(propertyNames.get("longitude"), valueOf(longitude))

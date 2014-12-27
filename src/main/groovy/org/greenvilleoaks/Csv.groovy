@@ -7,9 +7,22 @@ import org.supercsv.io.ICsvMapWriter
 import org.supercsv.prefs.CsvPreference
 
 final class Csv {
-    private final List<String> header
+    private final Collection<String> header
     private final String fileName
 
+
+    /**
+     * Create an instance of the class given the headers of the CSV columns.
+     * This variant assumes the user will pass in an a stream to the method loading or storing the CSV.
+     * 
+     * @param header The headers to use
+     */
+    public Csv(final Collection<String> header) {
+        this.fileName = null
+        this.header = header
+    }
+
+    
     /**
      * Create an instance of the class whose headers are derived from the content of the file
      * @param fileName The name of the CSV file
@@ -26,7 +39,7 @@ final class Csv {
      * @param fileName The name of the CSV file
      * @param header The headers to use if the file doesn't exist
      */
-    public Csv(final String fileName, final List<String> header) {
+    public Csv(final String fileName, final Collection<String> header) {
         this.fileName = fileName
         if (new File(fileName).exists()) {
             this.header = extractHeader()
@@ -91,6 +104,23 @@ final class Csv {
         ICsvMapWriter mapWriter = null;
         try {
             mapWriter = new CsvMapWriter(new FileWriter(fileName), CsvPreference.STANDARD_PREFERENCE)
+            mapWriter.writeHeader((String[])header.toArray())
+            listOfMaps.each {mapWriter.write(it, (String[])header.toArray())}
+        }
+        finally {
+            if( mapWriter != null ) mapWriter.close();
+        }
+    }
+
+
+    /**
+     * Store a list of maps to a file using the headers as keys to each row's map
+     * @param listOfMaps
+     */
+    public void store(final List<Map<String, String>> listOfMaps, final OutputStream stream) {
+        ICsvMapWriter mapWriter = null;
+        try {
+            mapWriter = new CsvMapWriter(new OutputStreamWriter(stream), CsvPreference.STANDARD_PREFERENCE)
             mapWriter.writeHeader((String[])header.toArray())
             listOfMaps.each {mapWriter.write(it, (String[])header.toArray())}
         }

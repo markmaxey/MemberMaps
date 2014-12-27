@@ -10,8 +10,21 @@ class Config {
     /** The Google API context used for all Google API calls */
     public final GeoApiContext context = new GeoApiContext()
 
-    /** The key created for the organization required to authenticate to Google Map APIs */
+    /** The Google project name */
+    public final String applicationName = "Google/GreenvilleOaks-1.0"
+
+    /** The Google project name */
+    public final String projectId = "greenvilleoaks"
+
+    /** The Google project number */
+    public final String projectNumber = "297047284747"
+
+    /** The public access key created for the organization required to authenticate to Google Map APIs */
     public final String apiKey = "AIzaSyBqAYLqYrV9ArcEsU3MNi3ffHbf-BQ3F1s"
+
+    /** The name of the generated OAuth JSON service account private key */
+    public final String jsonKeyFileName = 
+            System.properties.getProperty("user.home") + "\\Documents\\GO_Members_Map\\\\Greenville Oaks-0a1fa0b78eac.json"
 
     /** The name of the input file containing membership information */
     public final String membersCsvFileName =
@@ -53,7 +66,9 @@ class Config {
             "commuteDistance2CentralPointHumanReadable": "Commute Distance",
 
             "commuteTime2CentralPointInSeconds": "Commute Time In Seconds",
-            "commuteTime2CentralPointHumanReadable": "Commute Time"
+            "commuteTime2CentralPointHumanReadable": "Commute Time",
+            
+            "primaryKey": "Unique Id"
     ] as LinkedHashMap<String, String>
 
 
