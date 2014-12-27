@@ -7,15 +7,16 @@ import org.greenvilleoaks.view.RoleView
 public final class Members {
     final Config config
 
-    public Members(Config config) {
+    public Members(final Config config) {
         this.config = config
     }
 
     public List<Member> createMembers() {
         List<Member> members      = loadMembers()
         List<Member> geodedicAddresses = loadGeodedicAddresses()
+        List<DistanceBean> distanceCache = [] // TODO: Load from file
 
-        createGeodedicInfo4Members(members, geodedicAddresses)
+        createGeodedicInfo4Members(members, geodedicAddresses, distanceCache)
 
         storeGeodedicInfo(geodedicAddresses)
 
@@ -93,19 +94,23 @@ public final class Members {
     /**
      * @return The create with geodedic information
      */
-    private void createGeodedicInfo4Members(final List<Member> members, final List<Member> geodedicAddresses) {
+    private void createGeodedicInfo4Members(
+            final List<Member> members, 
+            final List<Member> geodedicAddresses,
+            final List<DistanceBean> distanceCache) {
         config.context.apiKey = config.apiKey
 
-        Geodedic geodedic = new Geodedic(
-                config.centralPointAddress,
-                new Google(config.context),
-        )
+        Google google = new Google(config.context)
+
+        Geodedic geodedic = new Geodedic(config.centralPointAddress, google)
 
         geodedic.create(
                 members,
                 new RoleView(config.propertyNames.role, members),
                 config.memberRoleCommute,
-                geodedicAddresses
+                geodedicAddresses,
+                distanceCache,
+                new Distance(google)
         )
     }
 }

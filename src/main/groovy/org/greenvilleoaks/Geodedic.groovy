@@ -1,8 +1,6 @@
 package org.greenvilleoaks
 
-import com.google.maps.model.DistanceMatrix
 import com.google.maps.model.DistanceMatrixElement
-import com.google.maps.model.DistanceMatrixElementStatus
 import com.google.maps.model.GeocodingResult
 import groovy.util.logging.Log4j
 import org.greenvilleoaks.view.View
@@ -45,12 +43,16 @@ final class Geodedic {
             final List<Member> members,
             final View roleView,
             final List<String> memberRoleCommute,
-            final List<Member> geodedicAddresses) {
+            final List<Member> geodedicAddresses,
+            final List<DistanceBean> distanceCache,
+            final Distance distance) {
         log.info("Geocoding members addresses ...")
 
         // Geocode any addresses that were missing from the Geodedic CSV file
         // Use JDK 8 fork/join to work on each member in a different thread in parallel efficiently
-        members.parallelStream().forEach({member -> create(member, roleView, memberRoleCommute, geodedicAddresses)})
+        members.parallelStream().forEach({member -> 
+            create(member, roleView, memberRoleCommute, geodedicAddresses, distanceCache, distance)
+        })
 
         log.info("Finished geocoding members addresses")
     }
@@ -71,7 +73,9 @@ final class Geodedic {
             final Member member,
             final View roleView,
             final List<String> memberRoleCommute,
-            final List<Member> geodedicAddresses) {
+            final List<Member> geodedicAddresses,
+            final List<DistanceBean> distanceCache,
+            final Distance distance) {
         log.info("Creating geodedic information for '" + member.fullName + "' in thread " + Thread.currentThread().toString())
         Member geodedicInfo
         synchronized (geodedicAddresses) {
@@ -81,7 +85,7 @@ final class Geodedic {
             log.info("Geodedic information for '" + member.fullName + "' was NOT cached.  Going to Google to create information from scratch ...")
 
             try {
-                createGeodedicInfo4AMember(member, roleView, memberRoleCommute)
+                createGeodedicInfo4AMember(member, roleView, memberRoleCommute, distanceCache, distance)
 
                 // Add the address' geodedic information so that subsequent
                 // members at the same address or subsequent runs of the
@@ -113,11 +117,15 @@ final class Geodedic {
     private void createGeodedicInfo4AMember(
             final Member member,
             final View roleView,
-            final List<String> memberRoleCommute) {
+            final List<String> memberRoleCommute,
+            final List<DistanceBean> distanceCache,
+            final Distance distance) {
         log.info("Creating geocoding information for " + member.fullName)
+
         geocode(member)
-        addDistance(member, centralAddress)
-        addDistancesFromMembers2Roles(member, roleView, memberRoleCommute)
+
+        distance.addDistance(member, centralAddress, distanceCache)
+        distance.addDistancesFromMembers2Roles(member, roleView, memberRoleCommute, distanceCache)
     }
 
 
@@ -130,7 +138,7 @@ final class Geodedic {
      * @param geodedicInfo         Cached geodedic information about an address of a member
      * @param member               The member to update with the geodedic information
      */
-    private void addCachedGeodedicInfo2Member(
+    private static void addCachedGeodedicInfo2Member(
             final List<String> memberRoleCommute,
             final Member geodedicInfo,
             final Member member) {
@@ -154,54 +162,6 @@ final class Geodedic {
 
 
 
-    /**
-     * Some members fill a certain role (e.g, small group leader, staff, etc.).  This method will add distance
-     * information to the given member for the shortest commute from the given member to any member in a given role.
-     * Only the roles specified in memberRoleCommute will be used.
-     *
-     * @param members              A member
-     * @param roleView             A perspective of all members where each role has a list of members
-     * @param memberRoleCommute    The shortest commute will be found for each member to another member in each of these roles.
-     */
-    private void addDistancesFromMembers2Roles(
-            final Member member,
-            final View roleView,
-            final List<String> memberRoleCommute) {
-        // For each role that we care about
-        memberRoleCommute.each { String role ->
-            Member minMember = null
-            DistanceMatrixElement minDistance  = null
-
-            // Create a list of members in that role
-            List<Member> membersInARole = roleView.data.get(role)
-
-            // Determine which member in the role lives closest to the given member
-            log.info("Calculating distance from " + member.firstName + " " + member.lastName + " to all " +
-                    membersInARole.size() + " members in role " + role)
-            membersInARole.each { Member memberInARole ->
-                // Skip members that live in the same household
-                // TODO: Cache the distance information between addresses - this is the most compute intensive part of execution!
-                if (member.fullAddress != memberInARole.fullAddress) {
-                    DistanceMatrixElement distanceMatrixElement = findDistance(member, memberInARole.fullAddress)
-
-                    if ((minDistance == null) ||
-                            (minDistance.distance.inMeters > distanceMatrixElement.distance.inMeters)) {
-                        minMember   = memberInARole
-                        minDistance = distanceMatrixElement
-                    }
-                }
-            }
-            log.info("The closest $role to '$minMember.fullName' is '$member.fullName'")
-
-            member.setProperty("Minimum Commute Distance In Meters to " + role, minDistance.distance.inMeters)
-            member.setProperty("Minimum Commute Distance to " + role,           minDistance.distance.humanReadable)
-            member.setProperty("Minimum Commute Time In Seconds to " + role,    minDistance.duration.inSeconds)
-            member.setProperty("Minimum Commute Time to " + role,               minDistance.duration.humanReadable)
-            member.setProperty("Minimum Commute to " + role,                    minMember.fullName)
-        }
-    }
-
-
     private void geocode(Member member) {
         GeocodingResult[] results = google.geocode(member.fullAddress)
 
@@ -217,48 +177,6 @@ final class Geodedic {
             member.formattedAddress = results[0].formattedAddress
         }
     }
-
-
-    private void addDistance(Member member, String destinationAddress) {
-        DistanceMatrixElement distanceMatrixElement = findDistance(member, destinationAddress)
-
-        if (distanceMatrixElement) {
-            member.commuteDistance2CentralPointInMeters      = distanceMatrixElement.distance.inMeters
-            member.commuteDistance2CentralPointHumanReadable = distanceMatrixElement.distance.humanReadable
-
-            member.commuteTime2CentralPointInSeconds         = distanceMatrixElement.duration.inSeconds
-            member.commuteTime2CentralPointHumanReadable     = distanceMatrixElement.duration.humanReadable
-        }
-    }
-
-
-    private DistanceMatrixElement findDistance(Member member, String destinationAddress) {
-        DistanceMatrix distanceMatrix = google.distanceMatrix(member.fullAddress, destinationAddress)
-
-        if (!distanceMatrix || !distanceMatrix.rows ||
-                (distanceMatrix.rows.size() == 0) ||
-                !distanceMatrix.rows[0] ||
-                !distanceMatrix.rows[0].elements ||
-                (distanceMatrix.rows[0].elements.size() == 0) ||
-                !distanceMatrix.rows[0].elements[0]) {
-            throw new GoogleException("Can't find distance from '$member.fullAddress' to '$destinationAddress'")
-        }
-        else if (distanceMatrix && distanceMatrix.rows && distanceMatrix.rows.size() > 1) {
-            throw new GoogleException("${distanceMatrix.rows.size()} distance matrix rows were found from '$member.fullAddress' to '$destinationAddress'")
-        }
-        else if (distanceMatrix && distanceMatrix.rows && distanceMatrix.rows[0].elements.size() > 1) {
-            throw new GoogleException("${distanceMatrix.rows[0].elements.size()} distance matrix elements were found from '$member.fullAddress' to '$destinationAddress'")
-        }
-        else if (distanceMatrix && distanceMatrix.rows && distanceMatrix.rows[0].elements[0].status != DistanceMatrixElementStatus.OK ) {
-            throw new GoogleException("${distanceMatrix.rows[0].elements.size()} distance matrix elements were found from '$member.fullAddress' to '$destinationAddress'")
-        }
-        else {
-            return distanceMatrix.rows[0].elements[0]
-        }
-
-        return null
-    }
-
 
 
 

@@ -127,12 +127,14 @@ class GeodedicSpec extends Specification {
                 GoogleFaultCode.none
         ]
 
-        Geodedic geodedic = setupData(1, 12, faultCodes, config, roles, members, addressesGeocoded)
+        Google google = new GoogleMock(faultCodes, addressesGeocoded)
+        Geodedic geodedic = setupData(1, 12, google, config, roles, members)
         geodedic.create(
                 members,
                 new RoleView(config.propertyNames.role, members),
                 config.memberRoleCommute,
-                geodedicAddresses)
+                geodedicAddresses, [], new Distance(google)) // TODO: distanceCache
+
 
 
         expect:
@@ -162,16 +164,19 @@ class GeodedicSpec extends Specification {
         // There are 12 members where members 3-8 are cached
         List<GoogleFaultCode> faultCodes = []
         for(int ndx=0; ndx<=12; ndx++) faultCodes << GoogleFaultCode.none
-        Geodedic geodedic = setupData(1, 12, faultCodes, config, roles, members, addressesGeocoded)
-        setupData(3, 8, faultCodes, config, roles, geodedicAddresses, [] as Set<String>)
+
+        Google google = new GoogleMock(faultCodes, addressesGeocoded)
+        Geodedic geodedic = setupData(1, 12, google, config, roles, members)
+        setupData(3, 8, google, config, roles, geodedicAddresses)
         setupCacheData(geodedicAddresses)
 
         geodedic.create(
-                members, 
-                new RoleView(config.propertyNames.role, members), 
-                config.memberRoleCommute, 
-                geodedicAddresses)
+                members,
+                new RoleView(config.propertyNames.role, members),
+                config.memberRoleCommute,
+                geodedicAddresses, [], new Distance(google)) // TODO: distanceCache
 
+        
         expect:
         6  == addressesGeocoded.size()
         12 == geodedicAddresses.size()
@@ -261,11 +266,10 @@ class GeodedicSpec extends Specification {
     private Geodedic setupData(
             final int startNdx,
             final int endNdx,
-            final List<GoogleFaultCode> memberNum2FaultCode,
+            final Google google,
             final Config config,
             final List<String> roles,
-            final List<Member> members,
-            final Set<String> addressesGeocoded) {
+            final List<Member> members) {
         for(int ndx=startNdx; ndx <= endNdx; ndx++) {
             members << new Member([
                     "Directory Name": Integer.toString(ndx),
@@ -276,6 +280,6 @@ class GeodedicSpec extends Specification {
             ], config.propertyNames, config.dateFormatter, config.memberRoleCommute)
         }
 
-        return new Geodedic("0", new GoogleMock(memberNum2FaultCode, addressesGeocoded))
+        return new Geodedic("0", google)
     }
 }
