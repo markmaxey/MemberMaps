@@ -40,7 +40,7 @@ public class MemberBean {
     /**
      * Construct a member bean
      *
-     * @param memberMap A map where the keys are the values in the propertyNames map and the values are the values of the bean
+     * @param memberMap A map where the keys are the values in the csvColumnMappings map and the values are the values of the bean
      * @param propertyNames A map where the keys are the property names of the bean and the values are the keys in the memberMap
      * @param dateFormatter A date formatter (for the birthday)
      * @param memberRoleCommute A list of roles that should be used to compute the minimum distance from a member to any member in that role
@@ -114,7 +114,7 @@ public class MemberBean {
 
     /**
      * @param propertyNames A map where the keys are the property names of the bean and the values are the keys in the memberMap
-     * @return A member map where the keys are the values of the propertyNames and the values are the property values of the member bean
+     * @return A member map where the keys are the values of the csvColumnMappings and the values are the property values of the member bean
      */
     public Map<String, String> toMap(Map<String, String> propertyNames) {
         Map<String, String> map = new LinkedHashMap<String, String>()

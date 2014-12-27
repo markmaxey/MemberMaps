@@ -4,6 +4,7 @@ import com.google.maps.model.DistanceMatrix
 import com.google.maps.model.DistanceMatrixElementStatus
 import com.google.maps.model.GeocodingResult
 import org.greenvilleoaks.beans.MemberBean
+import org.greenvilleoaks.config.Config
 import org.greenvilleoaks.mocks.GoogleFaultCode
 import org.greenvilleoaks.mocks.GoogleMock
 import org.greenvilleoaks.view.RoleView
@@ -132,7 +133,7 @@ class GeodedicSpec extends Specification {
         Geodedic geodedic = setupData(1, 12, google, config, roles, members)
         geodedic.create(
                 members,
-                new RoleView(config.propertyNames.role, members),
+                new RoleView(config.csvColumnMappings.role, members),
                 config.memberRoleCommute,
                 geodedicAddresses, [], new Distance(google))
 
@@ -173,7 +174,7 @@ class GeodedicSpec extends Specification {
 
         geodedic.create(
                 members,
-                new RoleView(config.propertyNames.role, members),
+                new RoleView(config.csvColumnMappings.role, members),
                 config.memberRoleCommute,
                 geodedicAddresses, [], new Distance(google))
 
@@ -278,7 +279,7 @@ class GeodedicSpec extends Specification {
                     "Preferred Name": Integer.toString(ndx),
                     "Role": roles.get(ndx),
                     "Zip Code": Integer.toString(ndx)
-            ], config.propertyNames, config.dateFormatter, config.memberRoleCommute)
+            ], config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
         }
 
         return new Geodedic("0", google)

@@ -3,6 +3,7 @@ package org.greenvilleoaks
 import org.greenvilleoaks.beans.DistanceBean
 import com.google.maps.model.DistanceMatrixElement
 import com.google.maps.model.Duration
+import org.greenvilleoaks.config.Config
 import org.greenvilleoaks.mocks.GoogleFaultCode
 import org.greenvilleoaks.mocks.GoogleMock
 import spock.lang.Ignore

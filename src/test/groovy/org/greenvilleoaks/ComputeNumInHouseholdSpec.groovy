@@ -1,6 +1,7 @@
 package org.greenvilleoaks
 
 import org.greenvilleoaks.beans.MemberBean
+import org.greenvilleoaks.config.Config
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -12,7 +13,7 @@ class ComputeNumInHouseholdSpec extends Specification {
         values.each { String value ->
             Map<String, String> memberMap = [:]
             memberMap.put(key, value)
-            memberList << new MemberBean(memberMap, config.propertyNames, config.dateFormatter, config.memberRoleCommute)
+            memberList << new MemberBean(memberMap, config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
         }
         return memberList
     }
@@ -20,7 +21,7 @@ class ComputeNumInHouseholdSpec extends Specification {
 
     def "Compute Number of People in Household"() {
         setup:
-        List<MemberBean> members = memberList(config.propertyNames.address,
+        List<MemberBean> members = memberList(config.csvColumnMappings.address,
                 [
                         "a", "a", "a",
                         "b", "b", "b",

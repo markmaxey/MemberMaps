@@ -1,6 +1,7 @@
 package org.greenvilleoaks
 
 import org.greenvilleoaks.beans.MemberBean
+import org.greenvilleoaks.config.Config
 import org.greenvilleoaks.view.AgeView
 import org.greenvilleoaks.view.CityView
 import org.greenvilleoaks.view.DistanceView
@@ -23,7 +24,7 @@ class ViewSpec extends Specification {
         values.each { String value ->
             Map<String, String> memberMap = [:]
             memberMap.put(key, value)
-            memberList << new MemberBean(memberMap, config.propertyNames, config.dateFormatter, config.memberRoleCommute)
+            memberList << new MemberBean(memberMap, config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
         }
         return memberList
     }
@@ -31,12 +32,12 @@ class ViewSpec extends Specification {
 
     def "Commute Distance"() {
         setup:
-        View view = new DistanceView(config.propertyNames.commuteDistance2CentralPointInMeters,
-                memberList(config.propertyNames.commuteDistance2CentralPointInMeters,
+        View view = new DistanceView(config.csvColumnMappings.commuteDistance2CentralPointInMeters,
+                memberList(config.csvColumnMappings.commuteDistance2CentralPointInMeters,
                         ["1610", "4000", null, "2000"]))
 
         expect:
-        view.name == config.propertyNames.commuteDistance2CentralPointInMeters
+        view.name == config.csvColumnMappings.commuteDistance2CentralPointInMeters
         view.data.get("0-1").size() == 2
         view.data.get("1-2").size() == 1
         view.data.get(View.NULL_BIN_NAME).size() == 1
@@ -45,8 +46,8 @@ class ViewSpec extends Specification {
 
     def "Commute Time"() {
         setup:
-        View view = new DurationView(config.propertyNames.commuteTime2CentralPointInSeconds,
-                memberList(config.propertyNames.commuteTime2CentralPointInSeconds,
+        View view = new DurationView(config.csvColumnMappings.commuteTime2CentralPointInSeconds,
+                memberList(config.csvColumnMappings.commuteTime2CentralPointInSeconds,
                         [null, Integer.toString(56*60).toString(),
                          Integer.toString(1*60).toString(),   Integer.toString(6*60).toString(),
                          Integer.toString(11*60).toString(),  Integer.toString(16*60).toString(),
@@ -58,7 +59,7 @@ class ViewSpec extends Specification {
                          null]))
 
         expect:
-        view.name == config.propertyNames.commuteTime2CentralPointInSeconds
+        view.name == config.csvColumnMappings.commuteTime2CentralPointInSeconds
         view.data.get("0-5").size()   == 1
         view.data.get("5-10").size()  == 1
         view.data.get("10-15").size() == 1
@@ -78,8 +79,8 @@ class ViewSpec extends Specification {
 
     def "Number of People in Household"() {
         setup:
-        View view = new NumInHouseholdView(config.propertyNames.numInHousehold,
-                memberList(config.propertyNames.address,
+        View view = new NumInHouseholdView(config.csvColumnMappings.numInHousehold,
+                memberList(config.csvColumnMappings.address,
                         [
                                 "a", "a", "a",
                                 "b", "b", "b",
@@ -98,7 +99,7 @@ class ViewSpec extends Specification {
         Map<String, String> histogramRow5 = histogram.find { it.get("Category") == "5" }
 
         expect:
-        view.name == config.propertyNames.numInHousehold
+        view.name == config.csvColumnMappings.numInHousehold
         view.data.get("1").size() == 4 // a & b
         view.data.get("2").size() == 8 // c, d, e, & j
         view.data.get("3").size() == 6 // f, g, h, & i
@@ -117,11 +118,11 @@ class ViewSpec extends Specification {
 
     def "City"() {
         setup:
-        View view = new CityView(config.propertyNames.city,
-                memberList(config.propertyNames.city, ["a", "b", null, "a"]))
+        View view = new CityView(config.csvColumnMappings.city,
+                memberList(config.csvColumnMappings.city, ["a", "b", null, "a"]))
 
         expect:
-        view.name == config.propertyNames.city
+        view.name == config.csvColumnMappings.city
         view.data.get("a").size() == 2
         view.data.get("b").size() == 1
         view.data.get(View.NULL_BIN_NAME).size() == 1
@@ -131,11 +132,11 @@ class ViewSpec extends Specification {
 
     def "Zip"() {
         setup:
-        View view = new ZipView(config.propertyNames.zip,
-                memberList(config.propertyNames.zip, ["2", "1", null, "2"]))
+        View view = new ZipView(config.csvColumnMappings.zip,
+                memberList(config.csvColumnMappings.zip, ["2", "1", null, "2"]))
 
         expect:
-        view.name == config.propertyNames.zip
+        view.name == config.csvColumnMappings.zip
         view.data.get("2").size() == 2
         view.data.get("1").size() == 1
         view.data.get(View.NULL_BIN_NAME).size() == 1
@@ -145,11 +146,11 @@ class ViewSpec extends Specification {
 
     def "Grade"() {
         setup:
-        View view = new GradeView(config.propertyNames.grade,
-                memberList(config.propertyNames.grade, ["a", "b", null, "a"]))
+        View view = new GradeView(config.csvColumnMappings.grade,
+                memberList(config.csvColumnMappings.grade, ["a", "b", null, "a"]))
 
         expect:
-        view.name == config.propertyNames.grade
+        view.name == config.csvColumnMappings.grade
         view.data.get("a").size() == 2
         view.data.get("b").size() == 1
         view.data.get(View.NULL_BIN_NAME).size() == 1
@@ -159,11 +160,11 @@ class ViewSpec extends Specification {
 
     def "Role"() {
         setup:
-        View view = new RoleView(config.propertyNames.role,
-                memberList(config.propertyNames.role, ["a", "b", null, "a"]))
+        View view = new RoleView(config.csvColumnMappings.role,
+                memberList(config.csvColumnMappings.role, ["a", "b", null, "a"]))
 
         expect:
-        view.name == config.propertyNames.role
+        view.name == config.csvColumnMappings.role
         view.data.get("a").size() == 2
         view.data.get("b").size() == 1
         view.data.get(View.NULL_BIN_NAME).size() == 1
@@ -190,11 +191,11 @@ class ViewSpec extends Specification {
          null]
         List<String> birthdays = []
         ages.each { birthdays << (it ?  LocalDate.now().minusYears(it).format(config.dateFormatter) : null) }
-        View view = new AgeView(config.propertyNames.age,
-                memberList(config.propertyNames.birthday, birthdays))
+        View view = new AgeView(config.csvColumnMappings.age,
+                memberList(config.csvColumnMappings.birthday, birthdays))
 
         expect:
-        view.name == config.propertyNames.age
+        view.name == config.csvColumnMappings.age
         view.data.get("5").size()  == 1
         view.data.get("10").size() == 1
         view.data.get("15").size() == 1

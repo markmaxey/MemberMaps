@@ -3,6 +3,7 @@ package org.greenvilleoaks
 import org.greenvilleoaks.beans.DistanceBean
 import groovy.util.logging.Log4j
 import org.greenvilleoaks.beans.MemberBean
+import org.greenvilleoaks.config.Config
 import org.greenvilleoaks.storage.Csv
 import org.greenvilleoaks.view.RoleView
 
@@ -44,7 +45,7 @@ public final class Members {
         List<MemberBean> members = []
 
         new Csv(config.membersCsvFileName).load().each {
-            members << new MemberBean(it, config.propertyNames, config.dateFormatter, config.memberRoleCommute)
+            members << new MemberBean(it, config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
         }
 
         log.info("Loaded ${members.size()} members")
@@ -64,7 +65,7 @@ public final class Members {
             log.info("Loading bonus members from '$config.bonusMembersCsvFileName' ...")
 
             new Csv(config.bonusMembersCsvFileName).load().each {
-                bonusMembers << new MemberBean(it, config.propertyNames, config.dateFormatter, config.memberRoleCommute)
+                bonusMembers << new MemberBean(it, config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
             }
 
             log.info("Loaded ${bonusMembers.size()} bonus members")
@@ -100,7 +101,7 @@ public final class Members {
 
             if (matchingMembers != null) {
                 matchingMembers.each { MemberBean matchingMember ->
-                    config.propertyNames.keySet().each { String propertyName ->
+                    config.csvColumnMappings.keySet().each { String propertyName ->
                         String propertyValue = bonusMember.getProperty(propertyName)
 
                         // Don't merge the primary keys or properties whose values are not specified in the bonus information
@@ -150,7 +151,7 @@ public final class Members {
         List<MemberBean> members = []
 
         new Csv(config.geodedicCsvFileName, config.geodedicCsvHeaders).load().each {
-            members << new MemberBean(it, config.propertyNames, config.dateFormatter, config.memberRoleCommute)
+            members << new MemberBean(it, config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
         }
 
         log.info("Loaded ${members.size()} addresses with geodedic information")
@@ -164,7 +165,7 @@ public final class Members {
         log.info("Caching geodedic information to '$config.geodedicCsvFileName' ...")
 
         List<Map<String, Object>> geodedicListOfMaps = []
-        geodedicInfo.each { geodedicListOfMaps << it.toMap(config.propertyNames)}
+        geodedicInfo.each { geodedicListOfMaps << it.toMap(config.csvColumnMappings)}
 
         new Csv(config.geodedicCsvFileName, config.geodedicCsvHeaders).store(geodedicListOfMaps)
 
@@ -214,15 +215,13 @@ public final class Members {
             final List<MemberBean> members,
             final List<MemberBean> geodedicAddresses,
             final List<DistanceBean> distanceCache) {
-        config.context.apiKey = config.apiKey
-
-        Google google = new Google(config.context)
+        Google google = new Google(config.google.context)
 
         Geodedic geodedic = new Geodedic(config.centralPointAddress, google)
 
         geodedic.create(
                 members,
-                new RoleView(config.propertyNames.role, members),
+                new RoleView(config.csvColumnMappings.role, members),
                 config.memberRoleCommute,
                 geodedicAddresses,
                 distanceCache,

@@ -1,6 +1,7 @@
 package org.greenvilleoaks
 
 import org.greenvilleoaks.beans.MemberBean
+import org.greenvilleoaks.config.Config
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -40,7 +41,7 @@ class MemberSpec extends Specification {
                 "Commute Time": "99 minutes"
         ]
 
-        MemberBean member = new MemberBean(memberMap, config.propertyNames, config.dateFormatter, config.memberRoleCommute)
+        MemberBean member = new MemberBean(memberMap, config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
 
         expect:
         member.address == memberMap."Address"
@@ -62,7 +63,7 @@ class MemberSpec extends Specification {
         member.longitude == Double.valueOf(memberMap."Longitude")
         member.zip == Integer.valueOf(memberMap."Zip Code")
 
-        Map<String, String> map = member.toMap(config.propertyNames)
+        Map<String, String> map = member.toMap(config.csvColumnMappings)
         map."Address" == memberMap."Address"
         map."Age" == Integer.toString(Period.between(LocalDate.of(1969, 5, 30), LocalDate.now()).years)
         map."Birth Date" == memberMap."Birth Date"
@@ -87,7 +88,7 @@ class MemberSpec extends Specification {
     def "Empty Map"() {
         setup:
         Map<String, String> memberMap = [:]
-        MemberBean member = new MemberBean(memberMap, config.propertyNames, config.dateFormatter, config.memberRoleCommute)
+        MemberBean member = new MemberBean(memberMap, config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
 
         expect:
         member.address == null
@@ -108,7 +109,7 @@ class MemberSpec extends Specification {
         member.longitude == null
         member.zip == null
 
-        Map<String, String> map = member.toMap(config.propertyNames)
+        Map<String, String> map = member.toMap(config.csvColumnMappings)
         map."Address" == null
         map."Age" == null
         map."Birth Date" == null
@@ -135,7 +136,7 @@ class MemberSpec extends Specification {
                 "Address" : address,
                 "City"    : city,
                 "Zip Code": zip
-        ], config.propertyNames, config.dateFormatter, config.memberRoleCommute)
+        ], config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
 
         member.fullAddress == fullAddress
 
