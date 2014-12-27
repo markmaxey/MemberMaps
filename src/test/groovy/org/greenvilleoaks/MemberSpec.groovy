@@ -1,5 +1,6 @@
 package org.greenvilleoaks
 
+import org.greenvilleoaks.beans.MemberBean
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -39,7 +40,7 @@ class MemberSpec extends Specification {
                 "Commute Time": "99 minutes"
         ]
 
-        Member member = new Member(memberMap, config.propertyNames, config.dateFormatter, config.memberRoleCommute)
+        MemberBean member = new MemberBean(memberMap, config.propertyNames, config.dateFormatter, config.memberRoleCommute)
 
         expect:
         member.address == memberMap."Address"
@@ -86,7 +87,7 @@ class MemberSpec extends Specification {
     def "Empty Map"() {
         setup:
         Map<String, String> memberMap = [:]
-        Member member = new Member(memberMap, config.propertyNames, config.dateFormatter, config.memberRoleCommute)
+        MemberBean member = new MemberBean(memberMap, config.propertyNames, config.dateFormatter, config.memberRoleCommute)
 
         expect:
         member.address == null
@@ -130,7 +131,7 @@ class MemberSpec extends Specification {
 
     def "Full Address"(String address, String city, String zip, String fullAddress) {
         expect:
-        Member member = new Member([
+        MemberBean member = new MemberBean([
                 "Address" : address,
                 "City"    : city,
                 "Zip Code": zip

@@ -1,4 +1,4 @@
-package org.greenvilleoaks
+package org.greenvilleoaks.beans
 
 import groovy.transform.Immutable
 

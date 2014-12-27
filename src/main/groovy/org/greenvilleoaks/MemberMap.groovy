@@ -3,7 +3,9 @@ package org.greenvilleoaks
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
 import groovy.util.logging.Log4j
+import org.greenvilleoaks.beans.MemberBean
 import org.greenvilleoaks.map.Workflow
+import org.greenvilleoaks.storage.Spreadsheet
 import org.greenvilleoaks.view.*
 
 /**
@@ -21,7 +23,7 @@ class MemberMap {
         log.info("Generating a members map and spreadsheet ...")
         log.info(config.toString())
 
-        List<Member> members = new Members(config).createMembers()
+        List<MemberBean> members = new Members(config).createMembers()
 
         Map<String, View> views = createViews(members)
 
@@ -44,7 +46,7 @@ class MemberMap {
      * @param members
      * @return various perspectives of the create
      */
-    private static Map<String, View> createViews(final List<Member> members) {
+    private static Map<String, View> createViews(final List<MemberBean> members) {
         Map<String, View> views = [:]
 
         views.put(config.propertyNames.city,           new CityView(config.propertyNames.city, members))
@@ -64,9 +66,9 @@ class MemberMap {
      * Dump all the perspectives of the create to an Excel workbook
      * @param views
      */
-    private static void createStatSpreadsheet(Collection<View> views, final List<Member> members) {
+    private static void createStatSpreadsheet(Collection<View> views, final List<MemberBean> members) {
         List<Map<String, String>> membersListMap = []
-        members.each { Member member -> membersListMap << member.toMap(config.propertyNames) }
+        members.each { MemberBean member -> membersListMap << member.toMap(config.propertyNames) }
 
         Spreadsheet spreadsheet = new Spreadsheet()
 

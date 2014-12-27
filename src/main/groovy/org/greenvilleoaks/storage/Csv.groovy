@@ -1,4 +1,4 @@
-package org.greenvilleoaks
+package org.greenvilleoaks.storage
 
 import org.supercsv.io.CsvMapReader
 import org.supercsv.io.CsvMapWriter

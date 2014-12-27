@@ -1,6 +1,9 @@
 package org.greenvilleoaks
 
+import org.greenvilleoaks.beans.DistanceBean
 import groovy.util.logging.Log4j
+import org.greenvilleoaks.beans.MemberBean
+import org.greenvilleoaks.storage.Csv
 import org.greenvilleoaks.view.RoleView
 
 @Log4j
@@ -11,9 +14,9 @@ public final class Members {
         this.config = config
     }
 
-    public List<Member> createMembers() {
-        List<Member> members      = loadMembers()
-        List<Member> geodedicAddresses = loadGeodedicAddresses()
+    public List<MemberBean> createMembers() {
+        List<MemberBean> members      = loadMembers()
+        List<MemberBean> geodedicAddresses = loadGeodedicAddresses()
         List<DistanceBean> distanceCache = loadDistanceCacheData()
 
         createGeodedicInfo4Members(members, geodedicAddresses, distanceCache)
@@ -24,12 +27,12 @@ public final class Members {
         return members
     }
 
-    private List<Member> loadMembers() {
+    private List<MemberBean> loadMembers() {
         log.info("Loading members from '$config.membersCsvFileName' ...")
-        List<Member> members = []
+        List<MemberBean> members = []
 
         new Csv(config.membersCsvFileName).load().each {
-            members << new Member(it, config.propertyNames, config.dateFormatter, config.memberRoleCommute)
+            members << new MemberBean(it, config.propertyNames, config.dateFormatter, config.memberRoleCommute)
         }
 
         log.info("Loaded ${members.size()} members")
@@ -44,11 +47,11 @@ public final class Members {
      * Compute the number of people in each household (address)
      * @param members
      */
-    public void computeNumInHousehold(List<Member> members) {
+    public void computeNumInHousehold(List<MemberBean> members) {
         log.info("Computing the number of people in each household ...")
 
         Map<String, Integer> fullAddress2NumInHousehold = [:]
-        members.each { Member member ->
+        members.each { MemberBean member ->
             Integer numInHousehold = fullAddress2NumInHousehold.get(member.fullAddress)
             if (numInHousehold == null) {
                 numInHousehold = new Integer(1)
@@ -59,18 +62,18 @@ public final class Members {
             }
         }
 
-        members.each { Member member ->
+        members.each { MemberBean member ->
             member.numInHousehold = fullAddress2NumInHousehold.get(member.fullAddress)
         }
     }
 
 
-    private List<Member> loadGeodedicAddresses() {
+    private List<MemberBean> loadGeodedicAddresses() {
         log.info("Loading cached geodedic information from '$config.geodedicCsvFileName' ...")
-        List<Member> members = []
+        List<MemberBean> members = []
 
         new Csv(config.geodedicCsvFileName, config.geodedicCsvHeaders).load().each {
-            members << new Member(it, config.propertyNames, config.dateFormatter, config.memberRoleCommute)
+            members << new MemberBean(it, config.propertyNames, config.dateFormatter, config.memberRoleCommute)
         }
 
         log.info("Loaded ${members.size()} addresses with geodedic information")
@@ -80,7 +83,7 @@ public final class Members {
 
 
 
-    private void storeGeodedicInfo(List<Member> geodedicInfo) {
+    private void storeGeodedicInfo(List<MemberBean> geodedicInfo) {
         log.info("Caching geodedic information to '$config.geodedicCsvFileName' ...")
 
         List<Map<String, Object>> geodedicListOfMaps = []
@@ -131,8 +134,8 @@ public final class Members {
      * @return The create with geodedic information
      */
     private void createGeodedicInfo4Members(
-            final List<Member> members, 
-            final List<Member> geodedicAddresses,
+            final List<MemberBean> members,
+            final List<MemberBean> geodedicAddresses,
             final List<DistanceBean> distanceCache) {
         config.context.apiKey = config.apiKey
 

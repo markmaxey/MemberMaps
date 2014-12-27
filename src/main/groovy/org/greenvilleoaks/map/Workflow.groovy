@@ -1,6 +1,5 @@
 package org.greenvilleoaks.map
 
-import com.google.api.client.auth.oauth2.Credential
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.api.client.http.HttpRequestInitializer
 import com.google.api.client.http.HttpTransport
@@ -15,8 +14,8 @@ import com.google.api.services.mapsengine.model.Table
 import com.google.maps.clients.BackOffWhenRateLimitedRequestInitializer
 import com.google.maps.clients.HttpRequestInitializerPipeline
 import groovy.util.logging.Log4j
-import org.greenvilleoaks.Csv
-import org.greenvilleoaks.Member
+import org.greenvilleoaks.storage.Csv
+import org.greenvilleoaks.beans.MemberBean
 import org.greenvilleoaks.view.View
 
 import java.util.logging.ConsoleHandler
@@ -29,12 +28,12 @@ import java.util.logging.Logger
 @Log4j
 final class Workflow {
     private final MapsEngine          engine
-    private final List<Member>        members
+    private final List<MemberBean>        members
     private final Map<String, View>   views
     private final Map<String, String> propertyNames    
 
     public Workflow(
-            final List<Member> members,
+            final List<MemberBean> members,
             final Map<String, View> views,
             final HttpTransport httpTransport,
             final JsonFactory jsonFactory,
@@ -120,7 +119,7 @@ final class Workflow {
 
 
     private InputStream createCsvInputStream(
-            final List<Member> members,
+            final List<MemberBean> members,
             final Map<String, String> propertyNames) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()
 

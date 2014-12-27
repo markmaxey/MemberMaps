@@ -2,16 +2,16 @@ package org.greenvilleoaks.view
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import org.greenvilleoaks.Member
+import org.greenvilleoaks.beans.MemberBean
 
 /** Members grouped by their age */
 @ToString
 @EqualsAndHashCode
 final class AgeView extends View {
-    public AgeView(final String name, final List<Member> members) { super(name, members) }
+    public AgeView(final String name, final List<MemberBean> members) { super(name, members) }
 
-    public Map<String, List<Member>> createViewData(final List<Member> members) {
-        return create(members, { Member member ->
+    public Map<String, List<MemberBean>> createViewData(final List<MemberBean> members) {
+        return create(members, { MemberBean member ->
             if (member.age == null) return NULL_BIN_NAME
 
             String ageBin

@@ -1,11 +1,12 @@
 package org.greenvilleoaks
 
+import org.greenvilleoaks.beans.DistanceBean
 import com.google.maps.model.DistanceMatrix
 import com.google.maps.model.DistanceMatrixElement
 import com.google.maps.model.DistanceMatrixElementStatus
-import com.google.maps.model.DistanceMatrixRow
 import com.google.maps.model.Duration
 import groovy.util.logging.Log4j
+import org.greenvilleoaks.beans.MemberBean
 import org.greenvilleoaks.view.View
 
 @Log4j
@@ -20,7 +21,7 @@ final class Distance {
 
 
     public void addDistance(
-            final Member member,
+            final MemberBean member,
             final String destinationAddress,
             final List<DistanceBean> distanceCache) {
         DistanceMatrixElement distanceMatrixElement = findDistance(member.fullAddress, destinationAddress, distanceCache)
@@ -121,22 +122,22 @@ final class Distance {
      * @param memberRoleCommute    The shortest commute will be found for each member to another member in each of these roles.
      */
     public void addDistancesFromMembers2Roles(
-            final Member member,
+            final MemberBean member,
             final View roleView,
             final List<String> memberRoleCommute,
             final List<DistanceBean> distanceCache) {
         // For each role that we care about
         memberRoleCommute.each { String role ->
-            Member minMember = null
+            MemberBean minMember = null
             DistanceMatrixElement minDistance  = null
 
             // Create a list of members in that role
-            List<Member> membersInARole = roleView.data.get(role)
+            List<MemberBean> membersInARole = roleView.data.get(role)
 
             // Determine which member in the role lives closest to the given member
             log.info("Calculating distance from " + member.firstName + " " + member.lastName + " to all " +
                     membersInARole.size() + " members in role " + role)
-            membersInARole.each { Member memberInARole ->
+            membersInARole.each { MemberBean memberInARole ->
                 // Skip members that live in the same household
                 if (member.fullAddress != memberInARole.fullAddress) {
                     DistanceMatrixElement distanceMatrixElement = findDistance(member.fullAddress, memberInARole.fullAddress, distanceCache)

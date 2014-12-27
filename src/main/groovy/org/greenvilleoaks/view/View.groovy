@@ -2,7 +2,7 @@ package org.greenvilleoaks.view
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import org.greenvilleoaks.Member
+import org.greenvilleoaks.beans.MemberBean
 
 /**
  * A perspective of the create.
@@ -16,13 +16,13 @@ abstract class View {
     final String name
 
     /** The perspective data */
-    final Map<String, List<Member>> data
+    final Map<String, List<MemberBean>> data
 
     /** The column headers and map keys */
     final String[] headers = ["Category", "Number of Members", "Percentage of Members"]
 
 
-    public View(final String name, final List<Member> members) {
+    public View(final String name, final List<MemberBean> members) {
         this.name = name
         this.data = createViewData(members)
     }
@@ -35,7 +35,7 @@ abstract class View {
      * @return members categorized based on some criteria where the keys are the criteria and the values
      * are the lists of members meeting that criteria.
      */
-    abstract Map<String, List<Member>> createViewData(final List<Member> members);
+    abstract Map<String, List<MemberBean>> createViewData(final List<MemberBean> members);
 
 
 
@@ -54,7 +54,7 @@ abstract class View {
 
     private List<Map<String, String>> histogramStats(int totalNumMembers, maxNumMembersInAnyCategory) {
         List<Map<String, String>> stats = []
-        data.each { String category, List<Member> members ->
+        data.each { String category, List<MemberBean> members ->
             double percentage = (double) members.size() / (double) totalNumMembers
             Map<String, String> stat = new LinkedHashMap<String, String>()
             stat.put(headers[0], category)
@@ -68,14 +68,14 @@ abstract class View {
 
     private int calculateTheTotalNumberOfMembers() {
         int totalNumMembers = 0
-        data.values().each { List<Member> members -> totalNumMembers += members.size() }
+        data.values().each { List<MemberBean> members -> totalNumMembers += members.size() }
         totalNumMembers
     }
 
 
     private int calculateTheMaximumNumberOfMembersInAnyCategory() {
         int maxNumMembersInAnyCategory = 0
-        data.values().each { List<Member> members ->
+        data.values().each { List<MemberBean> members ->
             if (maxNumMembersInAnyCategory < members.size()) maxNumMembersInAnyCategory = members.size()
         }
         maxNumMembersInAnyCategory
@@ -84,9 +84,9 @@ abstract class View {
 
     protected static void addValue(
             final String filterKey,
-            final Map<String, List<Member>> view,
-            final Member member) {
-        List<Member> entryList = view.get(filterKey)
+            final Map<String, List<MemberBean>> view,
+            final MemberBean member) {
+        List<MemberBean> entryList = view.get(filterKey)
         if (!entryList) {
             entryList = []
             view.put(filterKey, entryList)
@@ -96,12 +96,12 @@ abstract class View {
     }
 
 
-    protected Map<String, List<Member>> create(
-            List<Member> members,
+    protected Map<String, List<MemberBean>> create(
+            List<MemberBean> members,
             Closure binName) {
-        Map<String, List<Member>> view = [:]
+        Map<String, List<MemberBean>> view = [:]
 
-        members.each { Member member ->
+        members.each { MemberBean member ->
             addValue((String)binName.call(member), view, member)
         }
 

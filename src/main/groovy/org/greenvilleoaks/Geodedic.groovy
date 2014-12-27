@@ -1,8 +1,9 @@
 package org.greenvilleoaks
 
-import com.google.maps.model.DistanceMatrixElement
+import org.greenvilleoaks.beans.DistanceBean
 import com.google.maps.model.GeocodingResult
 import groovy.util.logging.Log4j
+import org.greenvilleoaks.beans.MemberBean
 import org.greenvilleoaks.view.View
 
 @Log4j
@@ -40,10 +41,10 @@ final class Geodedic {
      *                             the geodedic information for all addresses of all members.
      */
     public void create(
-            final List<Member> members,
+            final List<MemberBean> members,
             final View roleView,
             final List<String> memberRoleCommute,
-            final List<Member> geodedicAddresses,
+            final List<MemberBean> geodedicAddresses,
             final List<DistanceBean> distanceCache,
             final Distance distance) {
         log.info("Geocoding members addresses ...")
@@ -70,14 +71,14 @@ final class Geodedic {
      *                             the geodedic information for all addresses of all members.
      */
     public void create(
-            final Member member,
+            final MemberBean member,
             final View roleView,
             final List<String> memberRoleCommute,
-            final List<Member> geodedicAddresses,
+            final List<MemberBean> geodedicAddresses,
             final List<DistanceBean> distanceCache,
             final Distance distance) {
         log.info("Creating geodedic information for '" + member.fullName + "' in thread " + Thread.currentThread().toString())
-        Member geodedicInfo
+        MemberBean geodedicInfo
         synchronized (geodedicAddresses) {
             geodedicInfo = findGeodedicInfo4Address(member, geodedicAddresses)
         }
@@ -115,7 +116,7 @@ final class Geodedic {
      * @param memberRoleCommute    The shortest commute will be found for each member to another member in each of these roles.
      */
     private void createGeodedicInfo4AMember(
-            final Member member,
+            final MemberBean member,
             final View roleView,
             final List<String> memberRoleCommute,
             final List<DistanceBean> distanceCache,
@@ -140,8 +141,8 @@ final class Geodedic {
      */
     private static void addCachedGeodedicInfo2Member(
             final List<String> memberRoleCommute,
-            final Member geodedicInfo,
-            final Member member) {
+            final MemberBean geodedicInfo,
+            final MemberBean member) {
         member.latitude         = geodedicInfo.latitude
         member.longitude        = geodedicInfo.longitude
         member.formattedAddress = geodedicInfo.formattedAddress
@@ -162,7 +163,7 @@ final class Geodedic {
 
 
 
-    private void geocode(Member member) {
+    private void geocode(MemberBean member) {
         GeocodingResult[] results = google.geocode(member.fullAddress)
 
         if (!results || (results.size() == 0)) {
@@ -180,9 +181,9 @@ final class Geodedic {
 
 
 
-    private static Member findGeodedicInfo4Address(
-            final Member memberToBeFound,
-            final List<Member> members) {
+    private static MemberBean findGeodedicInfo4Address(
+            final MemberBean memberToBeFound,
+            final List<MemberBean> members) {
         return members.find {
             memberToBeFound.address.equals(it.address) &&
             memberToBeFound.city.equals(it.city) &&

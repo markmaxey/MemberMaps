@@ -2,15 +2,15 @@ package org.greenvilleoaks.view
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
-import org.greenvilleoaks.Member
+import org.greenvilleoaks.beans.MemberBean
 
 /** Members grouped by the zip code they live in */
 @ToString
 @EqualsAndHashCode
 final class ZipView extends View {
-    public ZipView(final String name, final List<Member> members) { super(name, members) }
+    public ZipView(final String name, final List<MemberBean> members) { super(name, members) }
 
-    public Map<String, List<Member>> createViewData(final List<Member> members) {
-        return create(members, { Member member -> member.zip ?: NULL_BIN_NAME})
+    public Map<String, List<MemberBean>> createViewData(final List<MemberBean> members) {
+        return create(members, { MemberBean member -> member.zip ?: NULL_BIN_NAME})
     }
 }

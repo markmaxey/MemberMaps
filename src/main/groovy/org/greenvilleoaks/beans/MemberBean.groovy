@@ -1,4 +1,4 @@
-package org.greenvilleoaks
+package org.greenvilleoaks.beans
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
@@ -9,7 +9,7 @@ import java.time.format.DateTimeFormatter
 
 @ToString(includeNames = true, includeFields = true)
 @EqualsAndHashCode
-public final class Member {
+public final class MemberBean {
     final String     fullName
     final String     lastName
     final String     firstName
@@ -45,7 +45,7 @@ public final class Member {
      * @param dateFormatter A date formatter (for the birthday)
      * @param memberRoleCommute A list of roles that should be used to compute the minimum distance from a member to any member in that role
      */
-    public Member(
+    public MemberBean(
             final Map<String, String> memberMap,
             final Map<String, String> propertyNames,
             final DateTimeFormatter dateFormatter,

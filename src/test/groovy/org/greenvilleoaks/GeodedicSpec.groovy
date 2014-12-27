@@ -3,6 +3,7 @@ package org.greenvilleoaks
 import com.google.maps.model.DistanceMatrix
 import com.google.maps.model.DistanceMatrixElementStatus
 import com.google.maps.model.GeocodingResult
+import org.greenvilleoaks.beans.MemberBean
 import org.greenvilleoaks.mocks.GoogleFaultCode
 import org.greenvilleoaks.mocks.GoogleMock
 import org.greenvilleoaks.view.RoleView
@@ -106,8 +107,8 @@ class GeodedicSpec extends Specification {
 
     def "Error cases"() {
         setup:
-        List<Member> members = []
-        List<Member> geodedicAddresses = []
+        List<MemberBean> members = []
+        List<MemberBean> geodedicAddresses = []
         Set<String> addressesGeocoded = [] as Set<String>
 
         // No members cached
@@ -157,8 +158,8 @@ class GeodedicSpec extends Specification {
 
     def "Members 3-8 are cached and 1, 2, 9, 10, 11, & 12 have their geodedic information computed."() {
         setup:
-        List<Member> members           = []
-        List<Member> geodedicAddresses = []
+        List<MemberBean> members           = []
+        List<MemberBean> geodedicAddresses = []
         Set<String> addressesGeocoded  = [] as Set<String>
 
         // There are 12 members where members 3-8 are cached
@@ -187,7 +188,7 @@ class GeodedicSpec extends Specification {
         }
 
 
-        members.each { Member member ->
+        members.each { MemberBean member ->
             assert member.latitude    == Double.valueOf(member.zip)
             assert member.longitude   == Double.valueOf(member.zip)
             assert member.fullAddress == Integer.toString(member.zip)
@@ -216,8 +217,8 @@ class GeodedicSpec extends Specification {
     
     
 
-    private void setupCacheData(List<Member> geodedicAddresses) {
-        geodedicAddresses.each { Member member ->
+    private void setupCacheData(List<MemberBean> geodedicAddresses) {
+        geodedicAddresses.each { MemberBean member ->
             member.latitude         = Double.valueOf(member.zip)
             member.longitude        = Double.valueOf(member.zip)
             member.formattedAddress = Double.valueOf(member.zip)
@@ -269,9 +270,9 @@ class GeodedicSpec extends Specification {
             final Google google,
             final Config config,
             final List<String> roles,
-            final List<Member> members) {
+            final List<MemberBean> members) {
         for(int ndx=startNdx; ndx <= endNdx; ndx++) {
-            members << new Member([
+            members << new MemberBean([
                     "Directory Name": Integer.toString(ndx),
                     "Last Name": Integer.toString(ndx),
                     "Preferred Name": Integer.toString(ndx),
