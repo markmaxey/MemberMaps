@@ -6,6 +6,10 @@ import org.greenvilleoaks.beans.MemberBean
 import org.greenvilleoaks.storage.Csv
 import org.greenvilleoaks.view.RoleView
 
+/**
+ * Load/Store all member information including cached and/or created
+ * geocoded and/or distance information between two addresses
+ */
 @Log4j
 public final class Members {
     final Config config
@@ -14,19 +18,27 @@ public final class Members {
         this.config = config
     }
 
+
     public List<MemberBean> createMembers() {
-        List<MemberBean> members      = loadMembers()
+        List<MemberBean> members = loadMembers()
+        loadBonusMemberData(members)
+        
         List<MemberBean> geodedicAddresses = loadGeodedicAddresses()
+
         List<DistanceBean> distanceCache = loadDistanceCacheData()
 
         createGeodedicInfo4Members(members, geodedicAddresses, distanceCache)
 
         storeGeodedicInfo(geodedicAddresses)
+
         storeDistanceCacheData(distanceCache)
 
         return members
     }
 
+
+
+    /** Load member information from a file */
     private List<MemberBean> loadMembers() {
         log.info("Loading members from '$config.membersCsvFileName' ...")
         List<MemberBean> members = []
@@ -41,6 +53,71 @@ public final class Members {
 
         return members
     }
+
+
+
+    /** Load member information from a file */
+    private List<MemberBean> loadBonusMemberData(List<MemberBean> members) {
+        List<MemberBean> bonusMembers = []
+
+        try {
+            log.info("Loading bonus members from '$config.bonusMembersCsvFileName' ...")
+
+            new Csv(config.bonusMembersCsvFileName).load().each {
+                bonusMembers << new MemberBean(it, config.propertyNames, config.dateFormatter, config.memberRoleCommute)
+            }
+
+            log.info("Loaded ${bonusMembers.size()} bonus members")
+
+            // Merge the "bonus" member information with standard information loaded in bulk
+            mergeBonusMembers(bonusMembers, members)
+        }
+        catch (Throwable throwable) {
+            log.warn(throwable.message)
+        }
+        
+        return bonusMembers
+    }
+
+
+    /**
+     * Merge the information found in bonusMembers with members.
+     * The merge matches a bonus member with a member by using a compound primary
+     * key comprised of any combination of first name, last name, and address.
+     * Once a match is found, then any non-null non-primary key values in the bonus member
+     * is copied into the member.
+     *  
+     * @param bonusMembers
+     * @param members
+     */
+    protected void mergeBonusMembers(List<MemberBean> bonusMembers, List<MemberBean> members) {
+        bonusMembers.each { MemberBean bonusMember ->
+            List<MemberBean> matchingMembers = members.findAll {
+                ((bonusMember.firstName == null) || bonusMember.firstName.equals(it.firstName)) ||
+                        ((bonusMember.lastName == null) || bonusMember.lastName.equals(it.lastName)) ||
+                        ((bonusMember.fullAddress == null) || bonusMember.fullAddress.equals(it.fullAddress))
+            }
+
+            if (matchingMembers != null) {
+                matchingMembers.each { MemberBean matchingMember ->
+                    config.propertyNames.keySet().each { String propertyName ->
+                        String propertyValue = bonusMember.getProperty(propertyName)
+
+                        // Don't merge the primary keys or properties whose values are not specified in the bonus information
+                        if ((!"firstName".equals(propertyName) ||
+                                !"lastName".equals(propertyName) ||
+                                !"address".equals(propertyName)  ||
+                                !"city".equals(propertyName) ||
+                                !"zip".equals(propertyName)
+                        ) && (propertyValue != null)) {
+                            matchingMember.setProperty(propertyName, propertyValue)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 
 
     /**

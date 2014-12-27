@@ -30,6 +30,10 @@ class Config {
     public final String membersCsvFileName =
             System.properties.getProperty("user.home") + "\\Documents\\GO_Members_Map\\\\Members.csv"
 
+    /** The name of the (optional) input file containing additional "bonus" membership information */
+    public final String bonusMembersCsvFileName =
+            System.properties.getProperty("user.home") + "\\Documents\\GO_Members_Map\\\\BonusMembers.csv"
+
     /** The name of the input/output cache file containing cached geodedic information
      * for the member's addresses (not full membership information) */
     public final String geodedicCsvFileName =

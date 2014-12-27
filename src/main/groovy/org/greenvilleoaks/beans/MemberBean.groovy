@@ -9,20 +9,20 @@ import java.time.format.DateTimeFormatter
 
 @ToString(includeNames = true, includeFields = true)
 @EqualsAndHashCode
-public final class MemberBean {
-    final String     fullName
-    final String     lastName
-    final String     firstName
-    final String     fullAddress
-    final String     address
-    final String     city
-    final Integer    zip
-    final Integer    age
-    final String     grade
-    final LocalDate  birthday
-    final String     role
+public class MemberBean {
+    String     fullName
+    String     lastName
+    String     firstName
+    String     fullAddress
+    String     address
+    String     city
+    Integer    zip
+    Integer    age
+    String     grade
+    LocalDate  birthday
+    String     role
     
-    final String primaryKey
+    String primaryKey
 
     Integer numInHousehold
     String formattedAddress
@@ -44,6 +44,7 @@ public final class MemberBean {
      * @param propertyNames A map where the keys are the property names of the bean and the values are the keys in the memberMap
      * @param dateFormatter A date formatter (for the birthday)
      * @param memberRoleCommute A list of roles that should be used to compute the minimum distance from a member to any member in that role
+     *                          These roles will be used to create dynamic properties on the bean.
      */
     public MemberBean(
             final Map<String, String> memberMap,
