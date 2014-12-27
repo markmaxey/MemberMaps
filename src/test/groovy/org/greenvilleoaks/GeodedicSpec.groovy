@@ -133,7 +133,7 @@ class GeodedicSpec extends Specification {
                 members,
                 new RoleView(config.propertyNames.role, members),
                 config.memberRoleCommute,
-                geodedicAddresses, [], new Distance(google)) // TODO: distanceCache
+                geodedicAddresses, [], new Distance(google))
 
 
 
@@ -174,7 +174,7 @@ class GeodedicSpec extends Specification {
                 members,
                 new RoleView(config.propertyNames.role, members),
                 config.memberRoleCommute,
-                geodedicAddresses, [], new Distance(google)) // TODO: distanceCache
+                geodedicAddresses, [], new Distance(google))
 
         
         expect:

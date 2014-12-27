@@ -14,11 +14,12 @@ public final class Members {
     public List<Member> createMembers() {
         List<Member> members      = loadMembers()
         List<Member> geodedicAddresses = loadGeodedicAddresses()
-        List<DistanceBean> distanceCache = [] // TODO: Load from file
+        List<DistanceBean> distanceCache = loadDistanceCacheData()
 
         createGeodedicInfo4Members(members, geodedicAddresses, distanceCache)
 
         storeGeodedicInfo(geodedicAddresses)
+        storeDistanceCacheData(distanceCache)
 
         return members
     }
@@ -78,6 +79,7 @@ public final class Members {
     }
 
 
+
     private void storeGeodedicInfo(List<Member> geodedicInfo) {
         log.info("Caching geodedic information to '$config.geodedicCsvFileName' ...")
 
@@ -87,6 +89,40 @@ public final class Members {
         new Csv(config.geodedicCsvFileName, config.geodedicCsvHeaders).store(geodedicListOfMaps)
 
         log.info("Cached ${geodedicListOfMaps.size()} addresses with geodedic information")
+    }
+
+
+
+    public List<DistanceBean> loadDistanceCacheData() {
+        log.info("Loading cached data between two addresses '$config.distanceDataCacheCsvFileName' ...")
+        List<DistanceBean> distanceCache = []
+
+        new Csv(config.distanceDataCacheCsvFileName, DistanceBean.csvHeaders).load().each {
+            distanceCache << new DistanceBean(
+                    it.get("address1"),
+                    it.get("address2"),
+                    Long.valueOf(it.get("distanceInMeters")),
+                    Long.valueOf(it.get("durationInSeconds")),
+                    it.get("distanceHumanReadable"),
+                    it.get("durationHumanReadable"))
+        }
+
+        log.info("Loaded ${distanceCache.size()} cached distance data between two addresses")
+
+        return distanceCache
+    }
+
+
+
+    public void storeDistanceCacheData(List<DistanceBean> distanceCache) {
+        log.info("Caching distance data between addresses to '$config.distanceDataCacheCsvFileName' ...")
+
+        List<Map<String, Object>> distanceCacheListOfMaps = []
+        distanceCache.each { distanceCacheListOfMaps << it.toMap()}
+
+        new Csv(config.distanceDataCacheCsvFileName, DistanceBean.csvHeaders).store(distanceCacheListOfMaps)
+
+        log.info("Cached ${distanceCacheListOfMaps.size()} distance data between two addresses")
     }
 
 

@@ -4,6 +4,7 @@ import com.google.maps.model.DistanceMatrixElement
 import com.google.maps.model.Duration
 import org.greenvilleoaks.mocks.GoogleFaultCode
 import org.greenvilleoaks.mocks.GoogleMock
+import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -154,5 +155,31 @@ class DistanceSpec extends Specification {
         distanceCache.size() == 2
         distanceCache[0].distanceHumanReadable == "4" || distanceCache[0].distanceHumanReadable == "3"
         distanceCache[1].distanceHumanReadable == "4" || distanceCache[1].distanceHumanReadable == "3"
+    }
+    
+    
+    @Ignore("This should not run as part of normal unit tests because it accesses the filesystem.")
+    def "Load/Store"() {
+        setup:
+        Members members = new Members(new Config())
+        DistanceBean expectedDistanceBean = [
+                address1: "1",
+                address2: "2",
+                distanceInMeters: 3,
+                distanceHumanReadable: "4",
+                durationInSeconds: 5,
+                durationHumanReadable: "6"
+        ] as DistanceBean
+        members.storeDistanceCacheData([expectedDistanceBean])
+        List<DistanceBean> cache = members.loadDistanceCacheData()
+        
+        expect:
+        cache.size() == 1
+        cache[0].address1 == "1"
+        cache[0].address2 == "2"
+        cache[0].distanceInMeters == 3
+        cache[0].distanceHumanReadable == "4"
+        cache[0].durationInSeconds == 5
+        cache[0].durationHumanReadable == "6"
     }
 }

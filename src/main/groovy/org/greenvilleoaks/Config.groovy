@@ -35,6 +35,11 @@ class Config {
     public final String geodedicCsvFileName =
             System.properties.getProperty("user.home") + "\\Documents\\GO_Members_Map\\\\Geodedic.csv"
 
+    /** The name of the input/output cache file containing cached geodedic information
+     * for the member's addresses (not full membership information) */
+    public final String distanceDataCacheCsvFileName =
+            System.properties.getProperty("user.home") + "\\Documents\\GO_Members_Map\\\\DistanceDataCache.csv"
+
     /** The name of the directory to store the spreadsheet output containing
      * full membership information (including geodedic) plus histograms of various views of the membership */
     public final String memberStatsDirName =
