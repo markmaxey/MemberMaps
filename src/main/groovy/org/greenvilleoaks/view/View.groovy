@@ -59,7 +59,7 @@ abstract class View {
             Map<String, String> stat = new LinkedHashMap<String, String>()
             stat.put(headers[0], category)
             stat.put(headers[1], String.format("%${Integer.toString(maxNumMembersInAnyCategory).length()}d", members.size()))
-            stat.put(headers[2], String.format("%3d", (int) (percentage * 100)))
+            stat.put(headers[2], String.format("%3d", Math.round(percentage * 100)))
             stats << stat
         }
         stats

@@ -90,12 +90,27 @@ class ViewSpec extends Specification {
                                 null, null, null, null, null
                         ]))
 
+        List<Map<String, String>> histogram = view.createStats()
+        Map<String, String> histogramRow1 = histogram.find { it.get("Category") == "1" }
+        Map<String, String> histogramRow2 = histogram.find { it.get("Category") == "2" }
+        Map<String, String> histogramRow3 = histogram.find { it.get("Category") == "3" }
+        Map<String, String> histogramRow5 = histogram.find { it.get("Category") == "5" }
+
         expect:
         view.name == config.propertyNames.numInHousehold
         view.data.get("1").size() == 4 // a & b
         view.data.get("2").size() == 8 // c, d, e, & j
         view.data.get("3").size() == 6 // f, g, h, & i
         view.data.get("5").size() == 5 // The null addresses
+
+        histogramRow1.get("Number of Members") == "4"
+        histogramRow1.get("Percentage of Members") == " 17"
+        histogramRow2.get("Number of Members") == "8"
+        histogramRow2.get("Percentage of Members") == " 35"
+        histogramRow3.get("Number of Members") == "6"
+        histogramRow3.get("Percentage of Members") == " 26"
+        histogramRow5.get("Number of Members") == "5"
+        histogramRow5.get("Percentage of Members") == " 22"
     }
 
 
