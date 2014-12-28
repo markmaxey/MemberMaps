@@ -101,17 +101,20 @@ public final class Members {
 
             if (matchingMembers != null) {
                 matchingMembers.each { MemberBean matchingMember ->
-                    config.csvColumnMappings.keySet().each { String propertyName ->
-                        String propertyValue = bonusMember.getProperty(propertyName)
+                    config.csvColumnMappings.metaClass.getProperties().each {
+                        String propertyName  = it.name
+                        if (!"class".equals(propertyName)) {
+                            String propertyValue = bonusMember.getProperty(propertyName)
 
-                        // Don't merge the primary keys or properties whose values are not specified in the bonus information
-                        if ((!"firstName".equals(propertyName) ||
-                                !"lastName".equals(propertyName) ||
-                                !"address".equals(propertyName)  ||
-                                !"city".equals(propertyName) ||
-                                !"zip".equals(propertyName)
-                        ) && (propertyValue != null)) {
-                            matchingMember.setProperty(propertyName, propertyValue)
+                            // Don't merge the primary keys or properties whose values are not specified in the bonus information
+                            if ((!"firstName".equals(propertyName) ||
+                                    !"lastName".equals(propertyName) ||
+                                    !"address".equals(propertyName)  ||
+                                    !"city".equals(propertyName) ||
+                                    !"zip".equals(propertyName)
+                            ) && (propertyValue != null)) {
+                                matchingMember.setProperty(propertyName, propertyValue)
+                            }
                         }
                     }
                 }

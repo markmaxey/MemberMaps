@@ -2,6 +2,7 @@ package org.greenvilleoaks.beans
 
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
+import org.greenvilleoaks.config.CsvColumnMappings
 
 import java.time.LocalDate
 import java.time.Period
@@ -41,41 +42,41 @@ public class MemberBean {
      * Construct a member bean
      *
      * @param memberMap A map where the keys are the values in the csvColumnMappings map and the values are the values of the bean
-     * @param propertyNames A map where the keys are the property names of the bean and the values are the keys in the memberMap
+     * @param csvColumnMappings A map where the keys are the property names of the bean and the values are the keys in the memberMap
      * @param dateFormatter A date formatter (for the birthday)
      * @param memberRoleCommute A list of roles that should be used to compute the minimum distance from a member to any member in that role
      *                          These roles will be used to create dynamic properties on the bean.
      */
     public MemberBean(
             final Map<String, String> memberMap,
-            final Map<String, String> propertyNames,
+            final CsvColumnMappings csvColumnMappings,
             final DateTimeFormatter dateFormatter,
             final List<String> memberRoleCommute) {
         this.dateFormatter     = dateFormatter
         this.memberRoleCommute = memberRoleCommute
 
-        fullName              = memberMap.get(propertyNames.fullName)
-        lastName              = memberMap.get(propertyNames.lastName)
-        firstName             = memberMap.get(propertyNames.firstName)
+        fullName              = memberMap.get(csvColumnMappings.fullName)
+        lastName              = memberMap.get(csvColumnMappings.lastName)
+        firstName             = memberMap.get(csvColumnMappings.firstName)
 
-        address               = memberMap.get(propertyNames.address)
-        city                  = memberMap.get(propertyNames.city)
-        zip                   = intValueOf(memberMap.get(propertyNames.zip))
-        formattedAddress      = memberMap.get(propertyNames.formattedAddress)
+        address               = memberMap.get(csvColumnMappings.address)
+        city                  = memberMap.get(csvColumnMappings.city)
+        zip                   = intValueOf(memberMap.get(csvColumnMappings.zip))
+        formattedAddress      = memberMap.get(csvColumnMappings.formattedAddress)
 
-        birthday              = dateValueOf(memberMap.get(propertyNames.birthday))
+        birthday              = dateValueOf(memberMap.get(csvColumnMappings.birthday))
         age                   = (birthday) ? Period.between(birthday, LocalDate.now()).years : null
-        grade                 = memberMap.get(propertyNames.grade)
-        role                  = memberMap.get(propertyNames.role)
+        grade                 = memberMap.get(csvColumnMappings.grade)
+        role                  = memberMap.get(csvColumnMappings.role)
 
-        latitude              = doubleValueOf(memberMap.get(propertyNames.latitude))
-        longitude             = doubleValueOf(memberMap.get(propertyNames.longitude))
+        latitude              = doubleValueOf(memberMap.get(csvColumnMappings.latitude))
+        longitude             = doubleValueOf(memberMap.get(csvColumnMappings.longitude))
 
-        commuteDistance2CentralPointInMeters      = longValueOf(memberMap.get(propertyNames.commuteDistance2CentralPointInMeters))
-        commuteDistance2CentralPointHumanReadable = memberMap.get(propertyNames.commuteDistance2CentralPointHumanReadable)
+        commuteDistance2CentralPointInMeters      = longValueOf(memberMap.get(csvColumnMappings.commuteDistance2CentralPointInMeters))
+        commuteDistance2CentralPointHumanReadable = memberMap.get(csvColumnMappings.commuteDistance2CentralPointHumanReadable)
 
-        commuteTime2CentralPointInSeconds     = longValueOf(memberMap.get(propertyNames.commuteTime2CentralPointInSeconds))
-        commuteTime2CentralPointHumanReadable = memberMap.get(propertyNames.commuteTime2CentralPointHumanReadable)
+        commuteTime2CentralPointInSeconds     = longValueOf(memberMap.get(csvColumnMappings.commuteTime2CentralPointInSeconds))
+        commuteTime2CentralPointHumanReadable = memberMap.get(csvColumnMappings.commuteTime2CentralPointHumanReadable)
 
         if (address && city && zip) {
             fullAddress = address + ", " + city + " " + zip
@@ -113,37 +114,37 @@ public class MemberBean {
 
 
     /**
-     * @param propertyNames A map where the keys are the property names of the bean and the values are the keys in the memberMap
+     * @param csvColumnMappings A map where the keys are the property names of the bean and the values are the keys in the memberMap
      * @return A member map where the keys are the values of the csvColumnMappings and the values are the property values of the member bean
      */
-    public Map<String, String> toMap(Map<String, String> propertyNames) {
+    public Map<String, String> toMap(CsvColumnMappings csvColumnMappings) {
         Map<String, String> map = new LinkedHashMap<String, String>()
 
-        map.put(propertyNames.get("fullName"), fullName)
-        map.put(propertyNames.get("lastName"), lastName)
-        map.put(propertyNames.get("firstName"), firstName)
+        map.put(csvColumnMappings.fullName, fullName)
+        map.put(csvColumnMappings.lastName, lastName)
+        map.put(csvColumnMappings.firstName, firstName)
 
-        map.put(propertyNames.get("address"), address)
-        map.put(propertyNames.get("city"), city)
-        map.put(propertyNames.get("zip"), valueOf(zip))
-        map.put(propertyNames.get("fullAddress"), fullAddress)
-        map.put(propertyNames.get("formattedAddress"), formattedAddress)
-        map.put(propertyNames.get("numInHousehold"), valueOf(numInHousehold))
+        map.put(csvColumnMappings.address, address)
+        map.put(csvColumnMappings.city, city)
+        map.put(csvColumnMappings.zip, valueOf(zip))
+        map.put(csvColumnMappings.fullAddress, fullAddress)
+        map.put(csvColumnMappings.formattedAddress, formattedAddress)
+        map.put(csvColumnMappings.numInHousehold, valueOf(numInHousehold))
 
-        map.put(propertyNames.get("birthday"), valueOf(birthday))
-        map.put(propertyNames.get("age"), valueOf(age))
-        map.put(propertyNames.get("grade"), grade)
-        map.put(propertyNames.get("role"), role)
-        map.put(propertyNames.get("primaryKey"), primaryKey)
+        map.put(csvColumnMappings.birthday, valueOf(birthday))
+        map.put(csvColumnMappings.age, valueOf(age))
+        map.put(csvColumnMappings.grade, grade)
+        map.put(csvColumnMappings.role, role)
+        map.put(csvColumnMappings.primaryKey, primaryKey)
 
-        map.put(propertyNames.get("latitude"),  valueOf(latitude))
-        map.put(propertyNames.get("longitude"), valueOf(longitude))
+        map.put(csvColumnMappings.latitude,  valueOf(latitude))
+        map.put(csvColumnMappings.longitude, valueOf(longitude))
 
-        map.put(propertyNames.get("commuteDistance2CentralPointInMeters"), valueOf(commuteDistance2CentralPointInMeters))
-        map.put(propertyNames.get("commuteDistance2CentralPointHumanReadable"), commuteDistance2CentralPointHumanReadable)
+        map.put(csvColumnMappings.commuteDistance2CentralPointInMeters, valueOf(commuteDistance2CentralPointInMeters))
+        map.put(csvColumnMappings.commuteDistance2CentralPointHumanReadable, commuteDistance2CentralPointHumanReadable)
 
-        map.put(propertyNames.get("commuteTime2CentralPointInSeconds"), valueOf(commuteTime2CentralPointInSeconds))
-        map.put(propertyNames.get("commuteTime2CentralPointHumanReadable"), commuteTime2CentralPointHumanReadable)
+        map.put(csvColumnMappings.commuteTime2CentralPointInSeconds, valueOf(commuteTime2CentralPointInSeconds))
+        map.put(csvColumnMappings.commuteTime2CentralPointHumanReadable, commuteTime2CentralPointHumanReadable)
 
         memberRoleCommute.each { String role ->
             map.put("Minimum Commute Distance In Meters to " + role, this.("Minimum Commute Distance In Meters to " + role))

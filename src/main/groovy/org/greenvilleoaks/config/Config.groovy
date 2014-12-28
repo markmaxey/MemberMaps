@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter
 @ToString(includeNames = true, includeFields = true)
 class Config {
     public Google google = new Google()
-//    public CsvColumnMappings csvColumnMappings = new CsvColumnMappings()
+    public CsvColumnMappings csvColumnMappings = new CsvColumnMappings()
     
     /** The name of the input file containing membership information */
     public final String membersCsvFileName =
@@ -33,6 +33,7 @@ class Config {
             System.properties.getProperty("user.home") + "\\Documents\\GO_Members_Map\\\\MemberStats"
 
     /** A map of the Member class field/property names to the name of the columns in the input/output files */
+    /*
     public Map<String, String> csvColumnMappings = [
             "fullName": "Directory Name",
             "lastName": "Last Name",
@@ -62,6 +63,7 @@ class Config {
             
             "primaryKey": "Unique Id"
     ] as LinkedHashMap<String, String>
+    */
 
     /** The name of the subset of Member fields/properties to cache in the geodedic address file */
     public List<String> geodedicCsvHeaders = [
@@ -90,11 +92,11 @@ class Config {
 
     public Config() {
         memberRoleCommute.each { String role ->
-            csvColumnMappings.put("Minimum Commute Distance In Meters to " + role, "Minimum Commute Distance In Meters to " + role)
-            csvColumnMappings.put("Minimum Commute Distance to " + role,           "Minimum Commute Distance to " + role)
-            csvColumnMappings.put("Minimum Commute Time In Seconds to " + role,    "Minimum Commute Time In Seconds to " + role)
-            csvColumnMappings.put("Minimum Commute Time to " + role,               "Minimum Commute Time to " + role)
-            csvColumnMappings.put("Minimum Commute to " + role,                    "Minimum Commute to " + role)
+            csvColumnMappings.metaClass.("Minimum Commute Distance In Meters to " + role) = "Minimum Commute Distance In Meters to " + role
+            csvColumnMappings.metaClass.("Minimum Commute Distance to " + role) =           "Minimum Commute Distance to " + role
+            csvColumnMappings.metaClass.("Minimum Commute Time In Seconds to " + role) =    "Minimum Commute Time In Seconds to " + role
+            csvColumnMappings.metaClass.("Minimum Commute Time to " + role) =               "Minimum Commute Time to " + role
+            csvColumnMappings.metaClass.("Minimum Commute to " + role) =                    "Minimum Commute to " + role
 
             geodedicCsvHeaders.add("Minimum Commute Distance In Meters to " + role)
             geodedicCsvHeaders.add("Minimum Commute Distance to " + role)
