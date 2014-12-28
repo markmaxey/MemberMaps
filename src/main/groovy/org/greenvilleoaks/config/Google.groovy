@@ -25,7 +25,8 @@ class Google {
             System.properties.getProperty("user.home") + "\\Documents\\GO_Members_Map\\\\Greenville Oaks-0a1fa0b78eac.json"
     
     
-    public Google() {
+    public Google init() {
         context.apiKey = apiKey
+        return this
     }
 }

@@ -9,7 +9,7 @@ import java.time.LocalDate
 import java.time.Period
 
 class MemberSpec extends Specification {
-    @Shared Config config = new Config()
+    @Shared Config config = new Config().init()
 
     def "Construct a member given all header/column/key names - even those that are computed"() {
         setup:
@@ -41,7 +41,7 @@ class MemberSpec extends Specification {
                 "Commute Time": "99 minutes"
         ]
 
-        MemberBean member = new MemberBean(memberMap, config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
+        MemberBean member = new MemberBean(memberMap, config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList)
 
         expect:
         member.address == memberMap."Address"
@@ -63,7 +63,7 @@ class MemberSpec extends Specification {
         member.longitude == Double.valueOf(memberMap."Longitude")
         member.zip == Integer.valueOf(memberMap."Zip Code")
 
-        Map<String, String> map = member.toMap(config.csvColumnMappings)
+        Map<String, String> map = member.toMap(config.membersCsvColumnMappings)
         map."Address" == memberMap."Address"
         map."Age" == Integer.toString(Period.between(LocalDate.of(1969, 5, 30), LocalDate.now()).years)
         map."Birth Date" == memberMap."Birth Date"
@@ -88,7 +88,7 @@ class MemberSpec extends Specification {
     def "Empty Map"() {
         setup:
         Map<String, String> memberMap = [:]
-        MemberBean member = new MemberBean(memberMap, config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
+        MemberBean member = new MemberBean(memberMap, config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList)
 
         expect:
         member.address == null
@@ -109,7 +109,7 @@ class MemberSpec extends Specification {
         member.longitude == null
         member.zip == null
 
-        Map<String, String> map = member.toMap(config.csvColumnMappings)
+        Map<String, String> map = member.toMap(config.membersCsvColumnMappings)
         map."Address" == null
         map."Age" == null
         map."Birth Date" == null
@@ -136,7 +136,7 @@ class MemberSpec extends Specification {
                 "Address" : address,
                 "City"    : city,
                 "Zip Code": zip
-        ], config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
+        ], config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList)
 
         member.fullAddress == fullAddress
 

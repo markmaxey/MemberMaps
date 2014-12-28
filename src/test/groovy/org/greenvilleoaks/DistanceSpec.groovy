@@ -163,7 +163,7 @@ class DistanceSpec extends Specification {
     @Ignore("This should not run as part of normal unit tests because it accesses the filesystem.")
     def "Load/Store"() {
         setup:
-        Members members = new Members(new Config())
+        Members members = new Members(new Config().init())
         DistanceBean expectedDistanceBean = [
                 address1: "1",
                 address2: "2",

@@ -6,7 +6,7 @@ import spock.lang.Shared
 import spock.lang.Specification
 
 class BonusMemberSpec extends Specification {
-    @Shared Config config = new Config()
+    @Shared Config config = new Config().init()
     
     /** The Class Under Test */
     @Shared Members cut = new Members(config)
@@ -16,7 +16,7 @@ class BonusMemberSpec extends Specification {
         setup:
         List<MemberBean> members = []
         List<MemberBean> bonusMembers = [
-                new MemberBean(["Preferred Name": "1"], config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
+                new MemberBean(["Preferred Name": "1"], config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList)
         ] as List<MemberBean>
         cut.mergeBonusMembers(bonusMembers, members)
         
@@ -31,7 +31,7 @@ class BonusMemberSpec extends Specification {
     def "No Bonus Members"() {
         List<MemberBean> bonusMembers = []
         List<MemberBean> members = [
-                new MemberBean(["Preferred Name": "1"], config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
+                new MemberBean(["Preferred Name": "1"], config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList)
         ] as List<MemberBean>
         cut.mergeBonusMembers(bonusMembers, members)
 
@@ -45,10 +45,10 @@ class BonusMemberSpec extends Specification {
 
     def "Bonus Members without PKs / no matches"() {
         List<MemberBean> members = [
-                new MemberBean(["Preferred Name": "1"], config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
+                new MemberBean(["Preferred Name": "1"], config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList)
         ] as List<MemberBean>
         List<MemberBean> bonusMembers = [
-                new MemberBean(["School Grade": "1"], config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
+                new MemberBean(["School Grade": "1"], config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList)
         ] as List<MemberBean>
         cut.mergeBonusMembers(bonusMembers, members)
 
@@ -62,10 +62,10 @@ class BonusMemberSpec extends Specification {
 
     def "Bonus Members with matching PK but no other data"() {
         List<MemberBean> members = [
-                new MemberBean(["Preferred Name": "1"], config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
+                new MemberBean(["Preferred Name": "1"], config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList)
         ] as List<MemberBean>
         List<MemberBean> bonusMembers = [
-                new MemberBean(["Preferred Name": "1"], config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
+                new MemberBean(["Preferred Name": "1"], config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList)
         ] as List<MemberBean>
         cut.mergeBonusMembers(bonusMembers, members)
 
@@ -79,10 +79,10 @@ class BonusMemberSpec extends Specification {
 
     def "Bonus Members with partial PKs"() {
         List<MemberBean> members = [
-                new MemberBean(["Preferred Name": "1"], config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
+                new MemberBean(["Preferred Name": "1"], config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList)
         ] as List<MemberBean>
         List<MemberBean> bonusMembers = [
-                new MemberBean(["Preferred Name": "1", "Role": "Small Group Leader"], config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
+                new MemberBean(["Preferred Name": "1", "Role": "Small Group Leader"], config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList)
         ] as List<MemberBean>
         cut.mergeBonusMembers(bonusMembers, members)
 
@@ -97,10 +97,10 @@ class BonusMemberSpec extends Specification {
 
     def "Bonus Members with replacement values"() {
         List<MemberBean> members = [
-                new MemberBean(["Preferred Name": "1", "Role": "SHOULD BE REPLACED"], config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
+                new MemberBean(["Preferred Name": "1", "Role": "SHOULD BE REPLACED"], config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList)
         ] as List<MemberBean>
         List<MemberBean> bonusMembers = [
-                new MemberBean(["Preferred Name": "1", "Role": "Small Group Leader"], config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
+                new MemberBean(["Preferred Name": "1", "Role": "Small Group Leader"], config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList)
         ] as List<MemberBean>
         cut.mergeBonusMembers(bonusMembers, members)
 
@@ -115,10 +115,10 @@ class BonusMemberSpec extends Specification {
 
     def "Bonus Members with city only"() {
         List<MemberBean> members = [
-                new MemberBean(["City": "1"], config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
+                new MemberBean(["City": "1"], config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList)
         ] as List<MemberBean>
         List<MemberBean> bonusMembers = [
-                new MemberBean(["City": "1", "Role": "Small Group Leader"], config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
+                new MemberBean(["City": "1", "Role": "Small Group Leader"], config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList)
         ] as List<MemberBean>
         cut.mergeBonusMembers(bonusMembers, members)
 
@@ -133,10 +133,10 @@ class BonusMemberSpec extends Specification {
 
     def "Bonus Members with null values"() {
         List<MemberBean> members = [
-                new MemberBean(["Preferred Name": "1", "Role": "Small Group Leader"], config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
+                new MemberBean(["Preferred Name": "1", "Role": "Small Group Leader"], config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList)
         ] as List<MemberBean>
         List<MemberBean> bonusMembers = [
-                new MemberBean(["Preferred Name": "1", "Role": null], config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
+                new MemberBean(["Preferred Name": "1", "Role": null], config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList)
         ] as List<MemberBean>
         cut.mergeBonusMembers(bonusMembers, members)
 
@@ -150,11 +150,11 @@ class BonusMemberSpec extends Specification {
 
     def "Bonus Members with multiple matches"() {
         List<MemberBean> members = [
-                new MemberBean(["Last Name": "1", "Preferred Name": "1"], config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute),
-                new MemberBean(["Last Name": "1", "Preferred Name": "2"], config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
+                new MemberBean(["Last Name": "1", "Preferred Name": "1"], config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList),
+                new MemberBean(["Last Name": "1", "Preferred Name": "2"], config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList)
         ] as List<MemberBean>
         List<MemberBean> bonusMembers = [
-                new MemberBean(["Last Name": "1", "Role": "Small Group Leader"], config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
+                new MemberBean(["Last Name": "1", "Role": "Small Group Leader"], config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList)
         ] as List<MemberBean>
         cut.mergeBonusMembers(bonusMembers, members)
 

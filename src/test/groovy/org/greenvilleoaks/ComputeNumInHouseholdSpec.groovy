@@ -6,14 +6,14 @@ import spock.lang.Shared
 import spock.lang.Specification
 
 class ComputeNumInHouseholdSpec extends Specification {
-    @Shared Config config = new Config()
+    @Shared Config config = new Config().init()
 
     private List<MemberBean> memberList(final String key, final List<String> values) {
         List<MemberBean> memberList = []
         values.each { String value ->
             Map<String, String> memberMap = [:]
             memberMap.put(key, value)
-            memberList << new MemberBean(memberMap, config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
+            memberList << new MemberBean(memberMap, config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList)
         }
         return memberList
     }
@@ -21,7 +21,7 @@ class ComputeNumInHouseholdSpec extends Specification {
 
     def "Compute Number of People in Household"() {
         setup:
-        List<MemberBean> members = memberList(config.csvColumnMappings.address,
+        List<MemberBean> members = memberList(config.membersCsvColumnMappings.address,
                 [
                         "a", "a", "a",
                         "b", "b", "b",

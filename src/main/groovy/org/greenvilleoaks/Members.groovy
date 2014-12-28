@@ -45,7 +45,7 @@ public final class Members {
         List<MemberBean> members = []
 
         new Csv(config.membersCsvFileName).load().each {
-            members << new MemberBean(it, config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
+            members << new MemberBean(it, config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList)
         }
 
         log.info("Loaded ${members.size()} members")
@@ -65,7 +65,7 @@ public final class Members {
             log.info("Loading bonus members from '$config.bonusMembersCsvFileName' ...")
 
             new Csv(config.bonusMembersCsvFileName).load().each {
-                bonusMembers << new MemberBean(it, config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
+                bonusMembers << new MemberBean(it, config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList)
             }
 
             log.info("Loaded ${bonusMembers.size()} bonus members")
@@ -101,7 +101,7 @@ public final class Members {
 
             if (matchingMembers != null) {
                 matchingMembers.each { MemberBean matchingMember ->
-                    config.csvColumnMappings.metaClass.getProperties().each {
+                    config.membersCsvColumnMappings.metaClass.getProperties().each {
                         String propertyName  = it.name
                         if (!"class".equals(propertyName)) {
                             String propertyValue = bonusMember.getProperty(propertyName)
@@ -153,8 +153,8 @@ public final class Members {
         log.info("Loading cached geodedic information from '$config.geodedicCsvFileName' ...")
         List<MemberBean> members = []
 
-        new Csv(config.geodedicCsvFileName, config.geodedicCsvHeaders).load().each {
-            members << new MemberBean(it, config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
+        new Csv(config.geodedicCsvFileName, config.geodedicCsvHeaderList).load().each {
+            members << new MemberBean(it, config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList)
         }
 
         log.info("Loaded ${members.size()} addresses with geodedic information")
@@ -168,9 +168,9 @@ public final class Members {
         log.info("Caching geodedic information to '$config.geodedicCsvFileName' ...")
 
         List<Map<String, Object>> geodedicListOfMaps = []
-        geodedicInfo.each { geodedicListOfMaps << it.toMap(config.csvColumnMappings)}
+        geodedicInfo.each { geodedicListOfMaps << it.toMap(config.membersCsvColumnMappings)}
 
-        new Csv(config.geodedicCsvFileName, config.geodedicCsvHeaders).store(geodedicListOfMaps)
+        new Csv(config.geodedicCsvFileName, config.geodedicCsvHeaderList).store(geodedicListOfMaps)
 
         log.info("Cached ${geodedicListOfMaps.size()} addresses with geodedic information")
     }
@@ -224,8 +224,8 @@ public final class Members {
 
         geodedic.create(
                 members,
-                new RoleView(config.csvColumnMappings.role, members),
-                config.memberRoleCommute,
+                new RoleView(config.membersCsvColumnMappings.role, members),
+                config.memberRoleCommuteList,
                 geodedicAddresses,
                 distanceCache,
                 new Distance(google)

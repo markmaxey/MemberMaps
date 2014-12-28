@@ -14,6 +14,7 @@ import com.google.api.services.mapsengine.model.Table
 import com.google.maps.clients.BackOffWhenRateLimitedRequestInitializer
 import com.google.maps.clients.HttpRequestInitializerPipeline
 import groovy.util.logging.Log4j
+import org.greenvilleoaks.config.CsvColumnMappings
 import org.greenvilleoaks.storage.Csv
 import org.greenvilleoaks.beans.MemberBean
 import org.greenvilleoaks.view.View
@@ -27,24 +28,24 @@ import java.util.logging.Logger
  */
 @Log4j
 final class Workflow {
-    private final MapsEngine          engine
-    private final List<MemberBean>        members
-    private final Map<String, View>   views
-    private final Map<String, String> propertyNames    
+    private final MapsEngine        engine
+    private final List<MemberBean>  members
+    private final Map<String, View> views
+    private final CsvColumnMappings csvColumnMappings
 
     public Workflow(
             final List<MemberBean> members,
             final Map<String, View> views,
             final HttpTransport httpTransport,
             final JsonFactory jsonFactory,
-            final Map<String, String> propertyNames,
+            final CsvColumnMappings csvColumnMappings,
             final String applicationName,
             final File secretsFile) {
         enableHttpLogging()
         
-        this.members       = members
-        this.views         = views
-        this.propertyNames = propertyNames
+        this.members           = members
+        this.views             = views
+        this.csvColumnMappings = csvColumnMappings
 
         log.info("Authorizing")
         GoogleCredential credential = new Auth().authorizeService(
@@ -84,7 +85,7 @@ final class Workflow {
         log.info("Table created, ID is: " + table.getId());
 
         log.info("Uploading the data files.");
-        uploadFile(table, createCsvInputStream(members, propertyNames), fileName, "text/csv");
+        uploadFile(table, createCsvInputStream(members, csvColumnMappings), fileName, "text/csv");
         log.info("Done.");
 
         def tableList = engine.tables().list()

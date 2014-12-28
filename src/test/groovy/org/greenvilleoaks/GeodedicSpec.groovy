@@ -12,7 +12,7 @@ import spock.lang.Shared
 import spock.lang.Specification
 
 class GeodedicSpec extends Specification {
-    @Shared Config config = new Config()
+    @Shared Config config = new Config().init()
     @Shared List<String> roles = [
             "Member",
             "Small Group Leader",
@@ -133,8 +133,8 @@ class GeodedicSpec extends Specification {
         Geodedic geodedic = setupData(1, 12, google, config, roles, members)
         geodedic.create(
                 members,
-                new RoleView(config.csvColumnMappings.role, members),
-                config.memberRoleCommute,
+                new RoleView(config.membersCsvColumnMappings.role, members),
+                config.memberRoleCommuteList,
                 geodedicAddresses, [], new Distance(google))
 
 
@@ -174,8 +174,8 @@ class GeodedicSpec extends Specification {
 
         geodedic.create(
                 members,
-                new RoleView(config.csvColumnMappings.role, members),
-                config.memberRoleCommute,
+                new RoleView(config.membersCsvColumnMappings.role, members),
+                config.memberRoleCommuteList,
                 geodedicAddresses, [], new Distance(google))
 
         
@@ -199,7 +199,7 @@ class GeodedicSpec extends Specification {
             assert member.commuteTime2CentralPointInSeconds         == Long.valueOf(member.zip)
             assert member.commuteTime2CentralPointHumanReadable     == Long.toString(member.zip)
 
-            config.memberRoleCommute.each { String role ->
+            config.memberRoleCommuteList.each { String role ->
                 int d = calculateSmallGroupLeaderExpectedDistanceDuration(member.zip)
                 assert member.getProperty("Minimum Commute Distance In Meters to " + role) == d
                 assert member.getProperty("Minimum Commute Distance to " + role)           == Integer.toString(d)
@@ -229,7 +229,7 @@ class GeodedicSpec extends Specification {
             member.commuteTime2CentralPointInSeconds         = Long.valueOf(member.zip)
             member.commuteTime2CentralPointHumanReadable     = member.zip
 
-            config.memberRoleCommute.each { String role ->
+            config.memberRoleCommuteList.each { String role ->
                 int d = calculateSmallGroupLeaderExpectedDistanceDuration(member.zip)
                 member.setProperty("Minimum Commute Distance In Meters to " + role, d)
                 member.setProperty("Minimum Commute Distance to " + role,           Integer.toString(d))
@@ -279,7 +279,7 @@ class GeodedicSpec extends Specification {
                     "Preferred Name": Integer.toString(ndx),
                     "Role": roles.get(ndx),
                     "Zip Code": Integer.toString(ndx)
-            ], config.csvColumnMappings, config.dateFormatter, config.memberRoleCommute)
+            ], config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList)
         }
 
         return new Geodedic("0", google)

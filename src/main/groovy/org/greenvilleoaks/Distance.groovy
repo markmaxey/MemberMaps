@@ -115,7 +115,7 @@ final class Distance {
     /**
      * Some members fill a certain role (e.g, small group leader, staff, etc.).  This method will add distance
      * information to the given member for the shortest commute from the given member to any member in a given role.
-     * Only the roles specified in memberRoleCommute will be used.
+     * Only the roles specified in memberRoleCommuteList will be used.
      *
      * @param members              A member
      * @param roleView             A perspective of all members where each role has a list of members

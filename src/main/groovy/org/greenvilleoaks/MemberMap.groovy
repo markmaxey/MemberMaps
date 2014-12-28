@@ -14,48 +14,67 @@ import org.greenvilleoaks.view.*
  */
 @Log4j
 class MemberMap {
-    public static final Config config = new Config()
-
     /**
      * The high level workflow logic
      * @param argv
      */
     public static void main(final String[] argv) {
+        Config config = loadConfig(argv)
+        
         log.info("Generating a members map and spreadsheet ...")
         log.info(config.toString())
 
         List<MemberBean> members = new Members(config).createMembers()
 
-        Map<String, View> views = createViews(members)
+        Map<String, View> views = createViews(config, members)
 
-        createStatSpreadsheet(views.values(), members)
+        createStatSpreadsheet(config, views.values(), members)
 
         new Workflow(
                 members,
                 views,
                 new NetHttpTransport(),
                 new GsonFactory(),
-                config.csvColumnMappings,
+                config.membersCsvColumnMappings,
                 config.google.applicationName,
                 new File(config.google.jsonKeyFileName)).run(config.google.projectId)
     }
 
 
+    private static Config loadConfig(final String[] argv) {
+        Config config
+        if (argv.length == 0) {
+            config = new Config()
+        }
+        else {
+            File configFile = new File(argv[0])
+            if (configFile.exists()) {
+                config = new ConfigSlurper().parse(new URL("file:///" + argv[0]))
+            }
+            else {
+                config = new Config()
+            }
+        }
+        
+        return config.init()
+    }
 
 
     /**
      * @param members
      * @return various perspectives of the create
      */
-    private static Map<String, View> createViews(final List<MemberBean> members) {
+    private static Map<String, View> createViews(
+            final Config config,
+            final List<MemberBean> members) {
         Map<String, View> views = [:]
 
-        views.put(config.csvColumnMappings.city,           new CityView(config.csvColumnMappings.city, members))
-        views.put(config.csvColumnMappings.zip,            new ZipView(config.csvColumnMappings.zip, members))
-        views.put(config.csvColumnMappings.numInHousehold, new NumInHouseholdView(config.csvColumnMappings.numInHousehold, members))
-        views.put(config.csvColumnMappings.age,            new AgeView(config.csvColumnMappings.age, members))
-        views.put(config.csvColumnMappings.grade,          new GradeView(config.csvColumnMappings.grade, members))
-        views.put(config.csvColumnMappings.role,           new RoleView(config.csvColumnMappings.role, members))
+        views.put(config.membersCsvColumnMappings.city,           new CityView(config.membersCsvColumnMappings.city, members))
+        views.put(config.membersCsvColumnMappings.zip,            new ZipView(config.membersCsvColumnMappings.zip, members))
+        views.put(config.membersCsvColumnMappings.numInHousehold, new NumInHouseholdView(config.membersCsvColumnMappings.numInHousehold, members))
+        views.put(config.membersCsvColumnMappings.age,            new AgeView(config.membersCsvColumnMappings.age, members))
+        views.put(config.membersCsvColumnMappings.grade,          new GradeView(config.membersCsvColumnMappings.grade, members))
+        views.put(config.membersCsvColumnMappings.role,           new RoleView(config.membersCsvColumnMappings.role, members))
         views.put("Commute Distance in Miles",         new DistanceView("Commute Distance in Miles", members))
         views.put("Commute Time in Minutes",           new DurationView("Commute Time in Minutes", members))
 
@@ -67,13 +86,16 @@ class MemberMap {
      * Dump all the perspectives of the create to an Excel workbook
      * @param views
      */
-    private static void createStatSpreadsheet(Collection<View> views, final List<MemberBean> members) {
+    private static void createStatSpreadsheet(
+            final Config config,
+            final Collection<View> views, 
+            final List<MemberBean> members) {
         List<Map<String, String>> membersListMap = []
-        members.each { MemberBean member -> membersListMap << member.toMap(config.csvColumnMappings) }
+        members.each { MemberBean member -> membersListMap << member.toMap(config.membersCsvColumnMappings) }
 
         Spreadsheet spreadsheet = new Spreadsheet()
 
-        spreadsheet.addContent("Members", config.csvColumnMappings.values().toArray() as String[], membersListMap)
+        spreadsheet.addContent("Members", config.membersCsvColumnMappings.values().toArray() as String[], membersListMap)
 
         views.each { View view ->
             spreadsheet.addContent(view.name, view.headers, view.createStats())
