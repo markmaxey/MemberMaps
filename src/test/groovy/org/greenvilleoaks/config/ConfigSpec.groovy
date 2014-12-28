@@ -26,8 +26,12 @@ membersCsvColumnMappings {
    firstName = 'First Name'
    age = 'Edad'
 }
+//projectId = 'abc'
 memberRoleCommute = '0,1,2'
 geodedicCsvHeaders = '0,1'
+google {
+   // projectNumber = "123"
+}
 """)
         config.init()
 
@@ -45,5 +49,8 @@ geodedicCsvHeaders = '0,1'
         config.memberRoleCommuteList[0] == "0"
         config.memberRoleCommuteList[1] == "1"
         config.memberRoleCommuteList[2] == "2"
+        
+        config.google.projectId     == 'greenvilleoaks'
+        config.google.projectNumber == "297047284747"
     }
 }
