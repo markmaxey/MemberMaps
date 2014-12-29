@@ -75,8 +75,8 @@ class MemberMap {
         views.put(config.membersCsvColumnMappings.age,            new AgeView(config.membersCsvColumnMappings.age, members))
         views.put(config.membersCsvColumnMappings.grade,          new GradeView(config.membersCsvColumnMappings.grade, members))
         views.put(config.membersCsvColumnMappings.role,           new RoleView(config.membersCsvColumnMappings.role, members))
-        views.put("Commute Distance in Miles",         new DistanceView("Commute Distance in Miles", members))
-        views.put("Commute Time in Minutes",           new DurationView("Commute Time in Minutes", members))
+        views.put("Commute Distance in Miles",                    new DistanceView("Commute Distance in Miles", members))
+        views.put("Commute Time in Minutes",                      new DurationView("Commute Time in Minutes", members))
 
         return views
     }
@@ -90,17 +90,21 @@ class MemberMap {
             final Config config,
             final Collection<View> views, 
             final List<MemberBean> members) {
+        Spreadsheet spreadsheet = new Spreadsheet()
+
+        // Convert the list of members into a list of maps
         List<Map<String, String>> membersListMap = []
         members.each { MemberBean member -> membersListMap << member.toMap(config.membersCsvColumnMappings) }
 
-        Spreadsheet spreadsheet = new Spreadsheet()
+        // Create the Members tab of the workbook
+        spreadsheet.addContent("Members", membersListMap[0].keySet().toArray() as String[], membersListMap)
 
-        spreadsheet.addContent("Members", config.membersCsvColumnMappings.values().toArray() as String[], membersListMap)
-
+        // Create a tab per view in the workboook
         views.each { View view ->
             spreadsheet.addContent(view.name, view.headers, view.createStats())
         }
 
+        // Write the workbook to disk
         spreadsheet.writeToFile(config.memberStatsDirName)
     }
 }
