@@ -1,5 +1,6 @@
 plugins {
     id "com.jfrog.bintray" version "0.4.1"
+    id "com.github.johnrengelman.shadow" version "1.2.0"
 }
 
 apply plugin: 'groovy'
@@ -10,7 +11,7 @@ apply plugin: 'application'
 
 version = '1.0'
 
-mainClassName = 'org.greenvilleoaks'
+mainClassName = 'org.greenvilleoaks.MemberMap'
 
 repositories {
     mavenCentral()
