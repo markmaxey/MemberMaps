@@ -45,7 +45,10 @@ public final class Members {
         List<MemberBean> members = []
 
         new Csv(config.membersCsvFileName).load().each {
-            members << new MemberBean(it, config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList)
+            String lastName = it.get(config.membersCsvColumnMappings.lastName)
+            if (lastName || !"".equals(lastName.trim())) {
+                members << new MemberBean(it, config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList)
+            }
         }
 
         log.info("Loaded ${members.size()} members")

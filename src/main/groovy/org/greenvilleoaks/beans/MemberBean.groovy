@@ -7,6 +7,7 @@ import org.greenvilleoaks.config.CsvColumnMappings
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 
 @ToString(includeNames = true, includeFields = true)
 @EqualsAndHashCode
@@ -55,7 +56,7 @@ public class MemberBean {
         this.dateFormatter     = dateFormatter
         this.memberRoleCommute = memberRoleCommute
 
-        directoryName              = memberMap.get(csvColumnMappings.directoryName)
+        directoryName         = memberMap.get(csvColumnMappings.directoryName)
         lastName              = memberMap.get(csvColumnMappings.lastName)
         firstName             = memberMap.get(csvColumnMappings.firstName)
 
@@ -168,7 +169,12 @@ public class MemberBean {
     }
 
     private LocalDate dateValueOf(String value) {
-        return (value != null) ? LocalDate.parse(value, dateFormatter) : null
+        try {
+            return (value != null) ? LocalDate.parse(value, dateFormatter) : null
+        }
+        catch (DateTimeParseException ex) {
+            return null
+        }
     }
 
 
