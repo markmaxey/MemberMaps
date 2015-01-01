@@ -3,9 +3,14 @@ package org.greenvilleoaks
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
 import groovy.util.logging.Log4j
+import org.apache.log4j.FileAppender
+import org.apache.log4j.Level
+import org.apache.log4j.Logger
+import org.apache.log4j.PatternLayout
 import org.greenvilleoaks.beans.MemberBean
 import org.greenvilleoaks.config.Config
 import org.greenvilleoaks.map.Workflow
+import org.greenvilleoaks.storage.FileUtils
 import org.greenvilleoaks.storage.Spreadsheet
 import org.greenvilleoaks.view.*
 
@@ -20,6 +25,8 @@ class MemberMap {
      */
     public static void main(final String[] argv) {
         Config config = loadConfig(argv)
+        
+        addFileLogAppender(config.memberStatsDirName)
         
         log.info("Generating a members map and spreadsheet ...")
         log.info(config.toString())
@@ -39,6 +46,24 @@ class MemberMap {
                 config.centralPointName,
                 new File(config.google.jsonKeyFileName)).run(config.google.projectId)
         */
+    }
+
+
+    private static void addFileLogAppender(final String dirName) {
+        String fileName = dirName + "\\" + "MemberMap.log"
+
+        if (!FileUtils.createParentDirs(fileName))
+            throw new RuntimeException("Can't create the parent directories for '$fileName'")
+        
+        FileAppender fileAppender = new FileAppender()
+        fileAppender.setName("FileLogger")
+        fileAppender.setFile(fileName)
+        fileAppender.setLayout(new PatternLayout("%d %-5p %c{1} - %m%n"))
+        fileAppender.setThreshold(Level.DEBUG)
+        fileAppender.setAppend(true)
+        fileAppender.activateOptions()
+
+        Logger.getRootLogger().addAppender(fileAppender)
     }
 
 
