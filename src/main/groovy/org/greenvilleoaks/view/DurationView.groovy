@@ -52,7 +52,7 @@ final class DurationView extends View {
                 return "55-60"
             }
             else {
-                return "> 60"
+                return "over 60"
             }
         })
     }
