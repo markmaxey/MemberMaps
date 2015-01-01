@@ -136,7 +136,5 @@ abstract class View {
         memberBeans.each { memberBeansListOfMaps << it.toMap(csvColumnMappings)}
 
         new Csv(fileName, memberBeansListOfMaps.get(0).keySet()).store(memberBeansListOfMaps)
-
-        log.info("Cached ${memberBeansListOfMaps.size()} ")
     }
 }

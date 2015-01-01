@@ -76,6 +76,11 @@ class Config {
         geodedicCsvHeaderList = geodedicCsvHeaders.split(",")
 
         memberRoleCommuteList = memberRoleCommute.split(",")
+
+        membersCsvColumnMappings.commuteDistance2CentralPointHumanReadable += " to " + centralPointName
+        membersCsvColumnMappings.commuteDistance2CentralPointInMeters      += " to " + centralPointName
+        membersCsvColumnMappings.commuteTime2CentralPointHumanReadable     += " to " + centralPointName
+        membersCsvColumnMappings.commuteTime2CentralPointInSeconds         += " to " + centralPointName
         
         memberRoleCommuteList.each { String role ->
             membersCsvColumnMappings.metaClass.("Minimum Commute Distance In Meters to " + role) = "Minimum Commute Distance In Meters to " + role

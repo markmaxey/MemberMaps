@@ -33,25 +33,32 @@ class MemberSpec extends Specification {
 
                 "Latitude": "1.234",
                 "Longitude": "5.678",
-
-                "Commute Distance In Meters": "99",
-                "Commute Distance": "99 miles",
-
-                "Commute Time In Seconds": "99",
-                "Commute Time": "99 minutes"
         ]
 
+        String commuteDistance2CentralPointHumanReadableKey = "Commute Distance to "  + config.centralPointName
+        String commuteDistance2CentralPointInMetersKey      = "Commute Distance In Meters to " + config.centralPointName
+        String commuteTime2CentralPointHumanReadableKey     = "Commute Time to " + config.centralPointName
+        String commuteTime2CentralPointInSecondsKey         = "Commute Time In Seconds to " + config.centralPointName
+
+        memberMap.put(commuteDistance2CentralPointHumanReadableKey, "99 miles")
+        memberMap.put(commuteDistance2CentralPointInMetersKey,      "99")
+        memberMap.put(commuteTime2CentralPointHumanReadableKey,     "99 minutes")
+        memberMap.put(commuteTime2CentralPointInSecondsKey,         "99")
+
         MemberBean member = new MemberBean(memberMap, config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList)
+
 
         expect:
         member.address == memberMap."Address"
         member.age == Period.between(LocalDate.of(1969, 5, 30), LocalDate.now()).years
         member.birthday == LocalDate.of(1969, 5, 30)
         member.city == memberMap."City"
-        member.commuteDistance2CentralPointHumanReadable == memberMap."Commute Distance"
-        member.commuteDistance2CentralPointInMeters == Long.valueOf(memberMap."Commute Distance In Meters")
-        member.commuteTime2CentralPointHumanReadable == memberMap."Commute Time"
-        member.commuteTime2CentralPointInSeconds == Long.valueOf(memberMap."Commute Time In Seconds")
+
+        member.commuteDistance2CentralPointHumanReadable == memberMap.get(commuteDistance2CentralPointHumanReadableKey)
+        member.commuteDistance2CentralPointInMeters      == Long.valueOf(memberMap.get(commuteDistance2CentralPointInMetersKey))
+        member.commuteTime2CentralPointHumanReadable     == memberMap.get(commuteTime2CentralPointHumanReadableKey)
+        member.commuteTime2CentralPointInSeconds         == Long.valueOf(memberMap.get(commuteTime2CentralPointInSecondsKey))
+
         member.firstName == memberMap."Preferred Name"
         member.formattedAddress == memberMap."Formatted Address"
         member.fullAddress == "132 Collin Ct, Murphy 75094"
