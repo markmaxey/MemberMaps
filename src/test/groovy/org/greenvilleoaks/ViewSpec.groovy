@@ -72,7 +72,7 @@ class ViewSpec extends Specification {
         view.data.get("45-50").size() == 1
         view.data.get("50-55").size() == 1
         view.data.get("55-60").size() == 2
-        view.data.get("> 60").size()  == 2
+        view.data.get("over 60").size()  == 2
         view.data.get(View.NULL_BIN_NAME).size() == 2
     }
 

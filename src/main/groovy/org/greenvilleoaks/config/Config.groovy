@@ -7,8 +7,11 @@ import java.time.format.DateTimeFormatter
 
 @ToString(includeNames = true, includeFields = true)
 class Config {
+    /** The name of a central location we want to find the distance to for each member */
+    public String centralPointName    = "Greenville Oaks Church of Christ"
+
     public Google google = new Google()
-    public CsvColumnMappings membersCsvColumnMappings = new CsvColumnMappings()
+    public CsvColumnMappings membersCsvColumnMappings = new CsvColumnMappings().init(centralPointName)
     
     /** The name of the input file containing membership information */
     public String membersCsvFileName =
@@ -55,9 +58,6 @@ class Config {
     
     public String dateTimeFormat = "M/d/yyyy"
 
-    /** The name of a central location we want to find the distance to for each member */
-    public String centralPointName    = "Greenville Oaks Church of Christ"
-
     /** The address of a central location we want to find the distance to for each member */
     public String centralPointAddress = "703 South Greenville Avenue, Allen, TX 75002"
 
@@ -70,17 +70,13 @@ class Config {
 
     public Config init() {
         google.init()
-        
+        membersCsvColumnMappings.init(centralPointName)
+
         dateFormatter = DateTimeFormatter.ofPattern(dateTimeFormat)
         
         geodedicCsvHeaderList = geodedicCsvHeaders.split(",")
 
         memberRoleCommuteList = memberRoleCommute.split(",")
-
-        membersCsvColumnMappings.commuteDistance2CentralPointHumanReadable += " to " + centralPointName
-        membersCsvColumnMappings.commuteDistance2CentralPointInMeters      += " to " + centralPointName
-        membersCsvColumnMappings.commuteTime2CentralPointHumanReadable     += " to " + centralPointName
-        membersCsvColumnMappings.commuteTime2CentralPointInSeconds         += " to " + centralPointName
         
         memberRoleCommuteList.each { String role ->
             membersCsvColumnMappings.metaClass.("Minimum Commute Distance In Meters to " + role) = "Minimum Commute Distance In Meters to " + role

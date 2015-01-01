@@ -1,5 +1,6 @@
 package org.greenvilleoaks.config
 
+import org.greenvilleoaks.beans.MemberBean
 import spock.lang.Specification
 
 class ConfigSpec extends Specification {
@@ -52,5 +53,44 @@ google {
         
         config.google.projectId     == 'greenvilleoaks'
         config.google.projectNumber == "297047284747"
+    }
+    
+    
+    def "Member columns are in sync between cached and full member data (defaults)"() {
+        setup:
+        Config config = new Config().init()
+        Set<String> memberKeys =
+                new MemberBean([:], config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList).
+                        toMap(config.membersCsvColumnMappings).
+                        keySet()
+
+        expect:
+        config.geodedicCsvHeaderList.each { assert memberKeys.contains(it) }
+    }
+
+
+
+
+    def "Member columns are in sync between cached and full member data (with overrides from config file)"() {
+        setup:
+        ConfigSlurper cs = new ConfigSlurper()
+        Config config = cs.parse("""
+membersCsvColumnMappings {
+   firstName = 'Common Name'
+   age = 'Edad'
+   // commuteDistance2CentralPointHumanReadable = 'THIS CANNOT BE OVERRIDDEN'
+   // commuteDistance2CentralPointInMeters      = 'THIS CANNOT BE OVERRIDDEN'
+   // commuteTime2CentralPointInSeconds         = 'THIS CANNOT BE OVERRIDDEN'
+   // commuteTime2CentralPointHumanReadable     = 'THIS CANNOT BE OVERRIDDEN'
+}
+""")
+        config.init()
+        Set<String> memberKeys =
+                new MemberBean([:], config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList).
+                        toMap(config.membersCsvColumnMappings).
+                        keySet()
+
+        expect:
+        config.geodedicCsvHeaderList.each { assert memberKeys.contains(it) }
     }
 }

@@ -25,6 +25,7 @@ class CsvColumnMappings {
     String latitude = "Latitude"
     String longitude = "Longitude"
 
+    // TODO: These four properties cannot be overridden by a user config file because they are enhanced below in init.
     String commuteDistance2CentralPointInMeters = "Commute Distance In Meters"
     String commuteDistance2CentralPointHumanReadable = "Commute Distance"
 
@@ -32,4 +33,19 @@ class CsvColumnMappings {
     String commuteTime2CentralPointHumanReadable = "Commute Time"
 
     String primaryKey = "Unique Id"
+    
+    private boolean inited = false
+    
+    protected CsvColumnMappings init(final String centralPointName) {
+        if (!inited) {
+            inited = true
+
+            commuteDistance2CentralPointHumanReadable += " to " + centralPointName
+            commuteDistance2CentralPointInMeters      += " to " + centralPointName
+            commuteTime2CentralPointHumanReadable     += " to " + centralPointName
+            commuteTime2CentralPointInSeconds         += " to " + centralPointName
+        }
+
+        return this
+    }
 }
