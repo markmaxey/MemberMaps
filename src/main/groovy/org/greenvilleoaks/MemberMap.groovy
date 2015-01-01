@@ -26,18 +26,19 @@ class MemberMap {
 
         List<MemberBean> members = new Members(config).createMembers()
 
-        Map<String, View> views = createViews(config, members)
+        Map<String, View> views = new Views().createAndStoreViews(config, members)
 
-        createStatSpreadsheet(config, views.values(), members)
 
+        /*
         new Workflow(
                 members,
                 views,
                 new NetHttpTransport(),
                 new GsonFactory(),
                 config.membersCsvColumnMappings,
-                config.google.applicationName,
+                config.centralPointName,
                 new File(config.google.jsonKeyFileName)).run(config.google.projectId)
+        */
     }
 
 
@@ -57,54 +58,5 @@ class MemberMap {
         }
         
         return config.init()
-    }
-
-
-    /**
-     * @param members
-     * @return various perspectives of the create
-     */
-    private static Map<String, View> createViews(
-            final Config config,
-            final List<MemberBean> members) {
-        Map<String, View> views = [:]
-
-        views.put(config.membersCsvColumnMappings.city,           new CityView(config.membersCsvColumnMappings.city, members))
-        views.put(config.membersCsvColumnMappings.zip,            new ZipView(config.membersCsvColumnMappings.zip, members))
-        views.put(config.membersCsvColumnMappings.numInHousehold, new NumInHouseholdView(config.membersCsvColumnMappings.numInHousehold, members))
-        views.put(config.membersCsvColumnMappings.age,            new AgeView(config.membersCsvColumnMappings.age, members))
-        views.put(config.membersCsvColumnMappings.grade,          new GradeView(config.membersCsvColumnMappings.grade, members))
-        views.put(config.membersCsvColumnMappings.role,           new RoleView(config.membersCsvColumnMappings.role, members))
-        views.put("Commute Distance in Miles",                    new DistanceView("Commute Distance in Miles", members))
-        views.put("Commute Time in Minutes",                      new DurationView("Commute Time in Minutes", members))
-
-        return views
-    }
-
-
-    /**
-     * Dump all the perspectives of the create to an Excel workbook
-     * @param views
-     */
-    private static void createStatSpreadsheet(
-            final Config config,
-            final Collection<View> views, 
-            final List<MemberBean> members) {
-        Spreadsheet spreadsheet = new Spreadsheet()
-
-        // Convert the list of members into a list of maps
-        List<Map<String, String>> membersListMap = []
-        members.each { MemberBean member -> membersListMap << member.toMap(config.membersCsvColumnMappings) }
-
-        // Create the Members tab of the workbook
-        spreadsheet.addContent("Members", membersListMap[0].keySet().toArray() as String[], membersListMap)
-
-        // Create a tab per view in the workboook
-        views.each { View view ->
-            spreadsheet.addContent(view.name, view.headers, view.createStats())
-        }
-
-        // Write the workbook to disk
-        spreadsheet.writeToFile(config.memberStatsDirName)
     }
 }

@@ -2,6 +2,7 @@ package org.greenvilleoaks.config
 
 import groovy.transform.ToString
 
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @ToString(includeNames = true, includeFields = true)
@@ -11,26 +12,27 @@ class Config {
     
     /** The name of the input file containing membership information */
     public String membersCsvFileName =
-            System.properties.getProperty("user.home") + "\\Documents\\GO_Members_Map\\\\Members.csv"
+            System.properties.getProperty("user.home") + "\\Documents\\GO_Members_Map\\Members.csv"
 
     /** The name of the (optional) input file containing additional "bonus" membership information */
     public String bonusMembersCsvFileName =
-            System.properties.getProperty("user.home") + "\\Documents\\GO_Members_Map\\\\BonusMembers.csv"
+            System.properties.getProperty("user.home") + "\\Documents\\GO_Members_Map\\BonusMembers.csv"
 
     /** The name of the input/output cache file containing cached geodedic information
      * for the member's addresses (not full membership information) */
     public String geodedicCsvFileName =
-            System.properties.getProperty("user.home") + "\\Documents\\GO_Members_Map\\\\Geodedic.csv"
+            System.properties.getProperty("user.home") + "\\Documents\\GO_Members_Map\\Output\\Geodedic.csv"
 
     /** The name of the input/output cache file containing cached geodedic information
      * for the member's addresses (not full membership information) */
     public String distanceDataCacheCsvFileName =
-            System.properties.getProperty("user.home") + "\\Documents\\GO_Members_Map\\\\DistanceDataCache.csv"
+            System.properties.getProperty("user.home") + "\\Documents\\GO_Members_Map\\Output\\DistanceDataCache.csv"
 
     /** The name of the directory to store the spreadsheet output containing
      * full membership information (including geodedic) plus histograms of various views of the membership */
     public String memberStatsDirName =
-            System.properties.getProperty("user.home") + "\\Documents\\GO_Members_Map\\\\MemberStats"
+            System.properties.getProperty("user.home") + "\\Documents\\GO_Members_Map\\Output\\" + 
+                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd' 'HH.mm.ss"))
 
     /** The name of the subset of Member fields/properties to cache in the geodedic address file */
     public List<String> geodedicCsvHeaderList = []

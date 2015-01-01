@@ -92,12 +92,12 @@ final class Spreadsheet {
      * @param dirName The directory where the file should be created.
      */
     public void writeToFile(final String dirName) {
-        String file = "${dirName}\\MemberStat-${System.currentTimeMillis()}.xlsx";
+        String fileName = dirName + "\\Members.xlsx"
 
-        File dir = new File(dirName)
-        if (!dir.exists()) dir.mkdirs()
-
-        FileOutputStream out = new FileOutputStream(file);
+        if (!FileUtils.createParentDirs(fileName))
+            throw new RuntimeException("Can't create the parent directories for '$fileName'")
+        
+        FileOutputStream out = new FileOutputStream(fileName);
         wb.write(out);
         out.close();
     }

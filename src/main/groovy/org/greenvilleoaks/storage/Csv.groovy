@@ -101,6 +101,9 @@ final class Csv {
      * @param listOfMaps
      */
     public void store(final List<Map<String, String>> listOfMaps) {
+        if (!FileUtils.createParentDirs(fileName)) 
+            throw new RuntimeException("Can't create the parent directories for '$fileName'")
+        
         ICsvMapWriter mapWriter = null;
         try {
             mapWriter = new CsvMapWriter(new FileWriter(fileName), CsvPreference.STANDARD_PREFERENCE)
@@ -118,6 +121,9 @@ final class Csv {
      * @param listOfMaps
      */
     public void store(final List<Map<String, String>> listOfMaps, final OutputStream stream) {
+        if (!FileUtils.createParentDirs(fileName))
+            throw new RuntimeException("Can't create the parent directories for '$fileName'")
+
         ICsvMapWriter mapWriter = null;
         try {
             mapWriter = new CsvMapWriter(new OutputStreamWriter(stream), CsvPreference.STANDARD_PREFERENCE)
