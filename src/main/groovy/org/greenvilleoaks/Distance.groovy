@@ -116,6 +116,8 @@ final class Distance {
      * Some members fill a certain role (e.g, small group leader, staff, etc.).  This method will add distance
      * information to the given member for the shortest commute from the given member to any member in a given role.
      * Only the roles specified in memberRoleCommuteList will be used.
+     * 
+     * If there are no roles provided or the memberRoleCommute is empty, then this method does nothing.
      *
      * @param members              A member
      * @param roleView             A perspective of all members where each role has a list of members
@@ -134,6 +136,8 @@ final class Distance {
             // Create a list of members in that role
             List<MemberBean> membersInARole = roleView.data.get(role)
 
+            if (!membersInARole || membersInARole.size() == 0) return
+            
             // Determine which member in the role lives closest to the given member
             log.info("Calculating distance from " + member.firstName + " " + member.lastName + " to all " +
                     membersInARole.size() + " members in role " + role)
