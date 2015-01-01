@@ -29,6 +29,8 @@ public final class Members {
         List<DistanceBean> distanceCache = loadDistanceCacheData()
 
         createGeodedicInfo4Members(members, geodedicAddresses, distanceCache)
+        
+        storeMembers(members)
 
         storeGeodedicInfo(geodedicAddresses)
 
@@ -57,6 +59,25 @@ public final class Members {
 
         return members
     }
+
+
+
+    /** Store the modified member information in a CSV file */
+    private void storeMembers(List<MemberBean> memberBeans) {
+        String fileName = config.memberStatsDirName + "\\" + "Members.csv"
+        
+        log.info("Storing enhanced membership information to '$fileName' ...")
+
+        List<Map<String, Object>> memberListOfMaps = []
+        memberBeans.each { memberListOfMaps << it.toMap(config.membersCsvColumnMappings)}
+
+        new Csv(fileName, memberListOfMaps.get(0).keySet()).store(memberListOfMaps)
+
+        log.info("Storing ${memberListOfMaps.size()} enhanced membership")
+    }
+
+
+
 
 
 
