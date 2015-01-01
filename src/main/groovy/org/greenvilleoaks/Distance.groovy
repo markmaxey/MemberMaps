@@ -149,13 +149,13 @@ final class Distance {
                     }
                 }
             }
-            log.info("The closest $role to '$minMember.fullName' is '$member.fullName'")
+            log.info("The closest $role to '$minMember.directoryName' is '$member.directoryName'")
 
             member.setProperty("Minimum Commute Distance In Meters to " + role, minDistance.distance.inMeters)
             member.setProperty("Minimum Commute Distance to " + role,           minDistance.distance.humanReadable)
             member.setProperty("Minimum Commute Time In Seconds to " + role,    minDistance.duration.inSeconds)
             member.setProperty("Minimum Commute Time to " + role,               minDistance.duration.humanReadable)
-            member.setProperty("Minimum Commute to " + role,                    minMember.fullName)
+            member.setProperty("Minimum Commute to " + role,                    minMember.directoryName)
         }
     }
 }

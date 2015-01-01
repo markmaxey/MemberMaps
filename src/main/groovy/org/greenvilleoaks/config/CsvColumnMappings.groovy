@@ -5,7 +5,7 @@ import groovy.transform.ToString
 /** A map of the Member class field/property names to the name of the columns in the input/output files */
 @ToString(includeNames = true, includeFields = true)
 class CsvColumnMappings {
-    String fullName = "Directory Name"
+    String directoryName = "Directory Name"
     String lastName = "Last Name"
     String firstName = "Preferred Name"
 

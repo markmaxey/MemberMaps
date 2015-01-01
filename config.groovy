@@ -54,7 +54,7 @@ google {
 
 
 membersCsvColumnMappings {
-    // fullName = "Directory Name"
+    // directoryName = "Directory Name"
     // lastName = "Last Name"
     // firstName = "Preferred Name"
 

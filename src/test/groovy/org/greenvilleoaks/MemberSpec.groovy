@@ -55,7 +55,7 @@ class MemberSpec extends Specification {
         member.firstName == memberMap."Preferred Name"
         member.formattedAddress == memberMap."Formatted Address"
         member.fullAddress == "132 Collin Ct, Murphy 75094"
-        member.fullName == memberMap."Directory Name"
+        member.directoryName == memberMap."Directory Name"
         member.grade == memberMap."School Grade"
         member.role == memberMap."Role"
         member.lastName == memberMap."Last Name"
@@ -101,7 +101,7 @@ class MemberSpec extends Specification {
         member.commuteTime2CentralPointHumanReadable == null
         member.firstName == null
         member.formattedAddress == null
-        member.fullName == null
+        member.directoryName == null
         member.grade == null
         member.role == null
         member.lastName == null

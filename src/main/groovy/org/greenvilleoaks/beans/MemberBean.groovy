@@ -11,7 +11,7 @@ import java.time.format.DateTimeFormatter
 @ToString(includeNames = true, includeFields = true)
 @EqualsAndHashCode
 public class MemberBean {
-    String     fullName
+    String     directoryName
     String     lastName
     String     firstName
     String     fullAddress
@@ -55,7 +55,7 @@ public class MemberBean {
         this.dateFormatter     = dateFormatter
         this.memberRoleCommute = memberRoleCommute
 
-        fullName              = memberMap.get(csvColumnMappings.fullName)
+        directoryName              = memberMap.get(csvColumnMappings.directoryName)
         lastName              = memberMap.get(csvColumnMappings.lastName)
         firstName             = memberMap.get(csvColumnMappings.firstName)
 
@@ -120,7 +120,7 @@ public class MemberBean {
     public Map<String, String> toMap(CsvColumnMappings csvColumnMappings) {
         Map<String, String> map = new LinkedHashMap<String, String>()
 
-        map.put(csvColumnMappings.fullName, fullName)
+        map.put(csvColumnMappings.directoryName, directoryName)
         map.put(csvColumnMappings.lastName, lastName)
         map.put(csvColumnMappings.firstName, firstName)
 

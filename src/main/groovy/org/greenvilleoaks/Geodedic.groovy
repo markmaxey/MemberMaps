@@ -77,13 +77,13 @@ final class Geodedic {
             final List<MemberBean> geodedicAddresses,
             final List<DistanceBean> distanceCache,
             final Distance distance) {
-        log.info("Creating geodedic information for '" + member.fullName + "' in thread " + Thread.currentThread().toString())
+        log.info("Creating geodedic information for '" + member.directoryName + "' in thread " + Thread.currentThread().toString())
         MemberBean geodedicInfo
         synchronized (geodedicAddresses) {
             geodedicInfo = findGeodedicInfo4Address(member, geodedicAddresses)
         }
         if (!geodedicInfo) {
-            log.info("Geodedic information for '" + member.fullName + "' was NOT cached.  Going to Google to create information from scratch ...")
+            log.info("Geodedic information for '" + member.directoryName + "' was NOT cached.  Going to Google to create information from scratch ...")
 
             try {
                 createGeodedicInfo4AMember(member, roleView, memberRoleCommute, distanceCache, distance)
@@ -101,7 +101,7 @@ final class Geodedic {
             }
         }
         else {
-            log.info("Geodedic information for '" + member.fullName + "' was cached.")
+            log.info("Geodedic information for '" + member.directoryName + "' was cached.")
             addCachedGeodedicInfo2Member(memberRoleCommute, geodedicInfo, member)
         }
     }
@@ -121,7 +121,7 @@ final class Geodedic {
             final List<String> memberRoleCommute,
             final List<DistanceBean> distanceCache,
             final Distance distance) {
-        log.info("Creating geocoding information for " + member.fullName)
+        log.info("Creating geocoding information for " + member.directoryName)
 
         geocode(member)
 
