@@ -27,6 +27,7 @@ class GeodedicSpec extends Specification {
             "Member",
             "Member",
             "Small Group Leader",
+            "Member",
     ]
 
 
@@ -126,11 +127,12 @@ class GeodedicSpec extends Specification {
                 GoogleFaultCode.multiple_distance_matrix_rows,
                 GoogleFaultCode.multiple_distance_matrix_row_elements,
                 GoogleFaultCode.distance_matrix_status_not_ok,
-                GoogleFaultCode.none
+                GoogleFaultCode.none,
+                GoogleFaultCode.geocode_results_zip_mismatch
         ]
 
         Google google = new GoogleMock(faultCodes, addressesGeocoded)
-        Geodedic geodedic = setupData(1, 12, google, config, roles, members)
+        Geodedic geodedic = setupData(1, 13, google, config, roles, members)
         geodedic.create(
                 members,
                 new RoleView(config.membersCsvColumnMappings.role, members),
@@ -140,8 +142,8 @@ class GeodedicSpec extends Specification {
 
 
         expect:
-        // All but 2 & 3 were geocoded
-        assert addressesGeocoded.size() == 10
+        // All but 2, 3, & 13 were geocoded
+        assert addressesGeocoded.size() == 11
         [1,4,5,6,7,8,9,10,11,12].each { int memberNum ->
             assert addressesGeocoded.find { it == Integer.toString(memberNum) } != null
         }

@@ -87,21 +87,21 @@ final class Distance {
         DistanceMatrix distanceMatrix = google.distanceMatrix(sourceAddress, destinationAddress)
 
         if (!distanceMatrix || !distanceMatrix.rows ||
-                (distanceMatrix.rows.size() == 0) ||
+                (distanceMatrix.rows.length == 0) ||
                 !distanceMatrix.rows[0] ||
                 !distanceMatrix.rows[0].elements ||
-                (distanceMatrix.rows[0].elements.size() == 0) ||
+                (distanceMatrix.rows[0].elements.length == 0) ||
                 !distanceMatrix.rows[0].elements[0]) {
             throw new GoogleException("Can't find distance from '$sourceAddress' to '$destinationAddress'")
         }
-        else if (distanceMatrix && distanceMatrix.rows && distanceMatrix.rows.size() > 1) {
-            throw new GoogleException("${distanceMatrix.rows.size()} distance matrix rows were found from '$sourceAddress' to '$destinationAddress'")
+        else if (distanceMatrix && distanceMatrix.rows && distanceMatrix.rows.length > 1) {
+            throw new GoogleException("${distanceMatrix.rows.length} distance matrix rows were found from '$sourceAddress' to '$destinationAddress'")
         }
-        else if (distanceMatrix && distanceMatrix.rows && distanceMatrix.rows[0].elements.size() > 1) {
-            throw new GoogleException("${distanceMatrix.rows[0].elements.size()} distance matrix elements were found from '$sourceAddress' to '$destinationAddress'")
+        else if (distanceMatrix && distanceMatrix.rows && distanceMatrix.rows[0].elements.length > 1) {
+            throw new GoogleException("${distanceMatrix.rows[0].elements.length} distance matrix elements were found from '$sourceAddress' to '$destinationAddress'")
         }
         else if (distanceMatrix && distanceMatrix.rows && distanceMatrix.rows[0].elements[0].status != DistanceMatrixElementStatus.OK ) {
-            throw new GoogleException("${distanceMatrix.rows[0].elements.size()} distance matrix elements were found from '$sourceAddress' to '$destinationAddress'")
+            throw new GoogleException("${distanceMatrix.rows[0].elements.length} distance matrix elements were found from '$sourceAddress' to '$destinationAddress'")
         }
         else {
             return distanceMatrix.rows[0].elements[0]

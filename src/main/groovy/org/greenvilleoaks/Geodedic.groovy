@@ -1,5 +1,6 @@
 package org.greenvilleoaks
 
+import com.google.maps.model.AddressComponentType
 import org.greenvilleoaks.beans.DistanceBean
 import com.google.maps.model.GeocodingResult
 import groovy.util.logging.Log4j
@@ -166,19 +167,44 @@ final class Geodedic {
     private void geocode(MemberBean member) {
         GeocodingResult[] results = google.geocode(member.fullAddress)
 
-        if (!results || (results.size() == 0)) {
+        if (!results || (results.length == 0)) {
             throw new GoogleException("No address was found for '$member.fullAddress'")
         }
-        else if (results && results.size() > 1) {
-            throw new GoogleException("${results.size()} addresses were found for '$member.fullAddress'")
+        else if (results && results.length > 1) {
+            String message = "${results.length} addresses were found for '$member.fullAddress':\n"
+            results.each { message += "\t" + it.formattedAddress + "\n" }
+            throw new GoogleException(message)
         }
         else {
+            verifyZipReturnedMatchesMemberZip(extractZipCodeFromGeocodeResults(results), member.zip, member.fullAddress)
+            
             member.latitude         = results[0].geometry.location.lat
             member.longitude        = results[0].geometry.location.lng
             member.formattedAddress = results[0].formattedAddress
         }
     }
 
+    
+    /** Throw an exception if the given zip code doesn't match that of the member (if one was provided) */
+    protected void verifyZipReturnedMatchesMemberZip(String googleZip, Integer memberZip, String fullAddress) {
+        if (!googleZip || "".equals(googleZip) || !googleZip.equals(Integer.toString(memberZip))) {
+            throw new GoogleException("When trying to geocode '$fullAddress', Google returned a zip of '$googleZip' which didn't match the zip code provided '$memberZip'")
+        }
+    }
+
+
+
+    /**
+     * @param results    The results from calling the Google Geocode API
+     * @return The zip code returned by Google 
+     */
+    protected String extractZipCodeFromGeocodeResults(final GeocodingResult[] results) {
+        // Extract the postal code from the returned address
+        String returnedZip = results[0].addressComponents.find {
+            it.types.find { AddressComponentType.POSTAL_CODE.equals(it) }
+        }.longName
+        returnedZip
+    }
 
 
     private static MemberBean findGeodedicInfo4Address(

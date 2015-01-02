@@ -9,6 +9,7 @@ enum GoogleFaultCode {
     none,
     no_geocode_results,
     multiple_geocode_results,
+    geocode_results_zip_mismatch,
     null_distance_matrix,
     null_distance_matrix_rows,
     no_distance_matrix_rows,
@@ -52,9 +53,21 @@ class GoogleMock extends Google {
         else {
             addressesGeocoded.add(fullAddress)
             GeocodingResult[] geocodingResults = [new GeocodingResult()]
+            
             geocodingResults[0].geometry           = new Geometry()
             geocodingResults[0].geometry.location  =
                     new LatLng(Double.valueOf(fullAddress), Double.valueOf(fullAddress))
+
+            geocodingResults[0].addressComponents              = new AddressComponent[1]
+            geocodingResults[0].addressComponents[0]           = new AddressComponent()
+            geocodingResults[0].addressComponents[0].types     = new AddressComponentType[1]
+
+            geocodingResults[0].addressComponents[0].types[0]  = AddressComponentType.POSTAL_CODE
+
+            String zip = (memberNum2FaultCode.get(Integer.valueOf(fullAddress)) == GoogleFaultCode.geocode_results_zip_mismatch) ? "MISMATCH POSTAL CODE" : fullAddress
+            geocodingResults[0].addressComponents[0].longName  = zip
+            geocodingResults[0].addressComponents[0].shortName = zip
+            
             return geocodingResults
         }
     }
