@@ -14,7 +14,7 @@ final class DistanceView extends View {
         return create(members, { MemberBean member ->
             if (member.commuteDistance2CentralPointInMeters == null) return NULL_BIN_NAME
             int miles = member.commuteDistance2CentralPointInMeters * 0.000621371d
-            return Integer.toString(miles-1) + "-" + Integer.toString(miles)
+            return (miles == 0) ? "0" : Integer.toString(miles-1) + "-" + Integer.toString(miles)
         })
     }
 }
