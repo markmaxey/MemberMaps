@@ -3,6 +3,7 @@ package org.greenvilleoaks.view
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import groovy.util.logging.Log4j
+import org.greenvilleoaks.Members
 import org.greenvilleoaks.beans.MemberBean
 import org.greenvilleoaks.config.CsvColumnMappings
 import org.greenvilleoaks.storage.Csv
@@ -127,14 +128,9 @@ abstract class View {
             final String binName, 
             final List<MemberBean> memberBeans) {
         String fileName = baseDirName + "\\" + name + "\\" + binName + ".csv"
+
         log.info("Storing $name view for $binName to '$fileName' ...")
-        
-        if (!FileUtils.createParentDirs(fileName))
-            throw new RuntimeException("Can't create the parent directories for '$fileName'")
 
-        List<Map<String, Object>> memberBeansListOfMaps = []
-        memberBeans.each { memberBeansListOfMaps << it.toMap(csvColumnMappings)}
-
-        new Csv(fileName, memberBeansListOfMaps.get(0).keySet()).store(memberBeansListOfMaps)
+        Members.storeAggregatedMembers(memberBeans, fileName, csvColumnMappings)
     }
 }

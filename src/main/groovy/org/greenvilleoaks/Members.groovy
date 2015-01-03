@@ -4,6 +4,7 @@ import org.greenvilleoaks.beans.DistanceBean
 import groovy.util.logging.Log4j
 import org.greenvilleoaks.beans.MemberBean
 import org.greenvilleoaks.config.Config
+import org.greenvilleoaks.config.CsvColumnMappings
 import org.greenvilleoaks.storage.Csv
 import org.greenvilleoaks.view.RoleView
 
@@ -68,17 +69,63 @@ public final class Members {
         
         log.info("Storing enhanced membership information to '$fileName' ...")
 
-        List<Map<String, Object>> memberListOfMaps = []
-        memberBeans.each { memberListOfMaps << it.toMap(config.membersCsvColumnMappings)}
+        List<Map<String, Object>> storedMemberListOfMaps = storeAggregatedMembers(memberBeans, fileName, config.membersCsvColumnMappings)
 
-        new Csv(fileName, memberListOfMaps.get(0).keySet()).store(memberListOfMaps)
-
-        log.info("Storing ${memberListOfMaps.size()} enhanced membership")
+        log.info("Storing ${storedMemberListOfMaps.size()} enhanced membership")
     }
 
 
 
+    /**
+     * This method will create a CSV file containing a row for each address in the membership.
+     * Members sharing the same address (in the same household) will have their information aggregated together.
+     *  
+     * @param memberBeans
+     * @param fileName
+     * @param membersCsvColumnMappings
+     * @return The list of maps used to populate the CSV file.
+     */
+    public static List<Map<String, Object>> storeAggregatedMembers(
+            final List<MemberBean> memberBeans,
+            final String fileName,
+            final CsvColumnMappings membersCsvColumnMappings) {
+        List<Map<String, Object>> storedMemberListOfMaps = []
+        memberBeans.each { MemberBean memberBean ->
+            Map<String, Object> alreadyAddedMemberMap = findMemberInListOfMemberMaps(storedMemberListOfMaps, memberBean, membersCsvColumnMappings)
+            if (alreadyAddedMemberMap) {
+                aggregateMembersAtSameAddress(alreadyAddedMemberMap, memberBean, membersCsvColumnMappings)
+            } else {
+                storedMemberListOfMaps << memberBean.toMap(membersCsvColumnMappings)
+            }
+        }
 
+        new Csv(fileName, storedMemberListOfMaps.get(0).keySet()).store(storedMemberListOfMaps)
+        
+        return storedMemberListOfMaps
+    }
+
+
+
+    protected static void aggregateMembersAtSameAddress(
+            final Map<String, Object> alreadyAddedMemberMap, 
+            final MemberBean memberBean,
+            final CsvColumnMappings membersCsvColumnMappings) {
+        alreadyAddedMemberMap.put(membersCsvColumnMappings.firstName, alreadyAddedMemberMap.get(membersCsvColumnMappings.firstName) + ", " + memberBean.firstName)
+        alreadyAddedMemberMap.put(membersCsvColumnMappings.age,       alreadyAddedMemberMap.get(membersCsvColumnMappings.age)       + ", " + memberBean.age)
+        alreadyAddedMemberMap.put(membersCsvColumnMappings.birthday,  alreadyAddedMemberMap.get(membersCsvColumnMappings.birthday)  + ", " + memberBean.birthday)
+        alreadyAddedMemberMap.put(membersCsvColumnMappings.grade,     alreadyAddedMemberMap.get(membersCsvColumnMappings.grade)     + ", " + memberBean.grade)
+    }
+
+
+
+    protected static Map<String, Object> findMemberInListOfMemberMaps(
+            final List<Map<String, Object>> storedMemberListOfMaps,
+            final MemberBean memberBean,
+            final CsvColumnMappings membersCsvColumnMappings) {
+        return storedMemberListOfMaps.find {
+            it.get(membersCsvColumnMappings.formattedAddress).equals(memberBean.formattedAddress)
+        }
+    }
 
 
     /** Load member information from a file */
