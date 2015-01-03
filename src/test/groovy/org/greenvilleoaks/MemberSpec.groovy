@@ -159,4 +159,121 @@ class MemberSpec extends Specification {
         "a"     | null | null | "a"
         null    | null | null | null
     }
+
+
+
+
+    def "Find all members matching the bonus member"(
+            String firstName, String lastName, String address, int numMatches) {
+        setup:
+        Members members = new Members(config)
+
+        List<MemberBean> memberBeanList = []
+        ["fn1", "fn2", "fn3"].each { String fn ->
+            ["ln1", "ln2", "ln3"].each { String ln ->
+                ["ad1", "ad2", "ad3"].each { String ad ->
+                    memberBeanList << new MemberBean([
+                            "Preferred Name" : fn,
+                            "Last Name"      : ln,
+                            "Address"        : ad
+                    ], config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList)
+                }
+            }
+        }
+
+        MemberBean bonusMember = new MemberBean([
+                "Preferred Name" : firstName,
+                "Last Name"      : lastName,
+                "Address"        : address
+        ], config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList)
+
+        List<MemberBean> matchingMembers = members.findAllMembersMatchingTheBonusMember(bonusMember, memberBeanList)
+        
+
+        expect:
+        matchingMembers.size() == numMatches
+
+        where:
+        firstName | lastName | address | numMatches
+        "fn1"     | "ln1"    | "ad1"       | 1
+        "fn1"     | "ln2"    | "ad1"       | 1
+        "fn1"     | "ln1"    | "ad2"       | 1
+        "fn1"     | "ln2"    | "ad2"       | 1
+        "fn1"     | "ln3"    | "ad1"       | 1
+        "fn1"     | "ln1"    | "ad3"       | 1
+        "fn1"     | "ln3"    | "ad3"       | 1
+        "fn1"     | "ln3"    | "ad2"       | 1
+        "fn1"     | "ln2"    | "ad3"       | 1
+
+        "fn2"     | "ln1"    | "ad1"       | 1
+        "fn2"     | "ln2"    | "ad1"       | 1
+        "fn2"     | "ln1"    | "ad2"       | 1
+        "fn2"     | "ln2"    | "ad2"       | 1
+        "fn2"     | "ln3"    | "ad1"       | 1
+        "fn2"     | "ln1"    | "ad3"       | 1
+        "fn2"     | "ln3"    | "ad3"       | 1
+        "fn2"     | "ln3"    | "ad2"       | 1
+        "fn2"     | "ln2"    | "ad3"       | 1
+
+        "fn3"     | "ln1"    | "ad1"       | 1
+        "fn3"     | "ln2"    | "ad1"       | 1
+        "fn3"     | "ln1"    | "ad2"       | 1
+        "fn3"     | "ln2"    | "ad2"       | 1
+        "fn3"     | "ln3"    | "ad1"       | 1
+        "fn3"     | "ln1"    | "ad3"       | 1
+        "fn3"     | "ln3"    | "ad3"       | 1
+        "fn3"     | "ln3"    | "ad2"       | 1
+        "fn3"     | "ln2"    | "ad3"       | 1
+
+        null      | "ln1"    | "ad1"       | 3
+        null      | "ln2"    | "ad1"       | 3
+        null      | "ln1"    | "ad2"       | 3
+        null      | "ln2"    | "ad2"       | 3
+        null      | "ln3"    | "ad1"       | 3
+        null      | "ln1"    | "ad3"       | 3
+        null      | "ln3"    | "ad3"       | 3
+        null      | "ln3"    | "ad2"       | 3
+        null      | "ln2"    | "ad3"       | 3
+
+        "fn1"     | null     | "ad1"       | 3
+        "fn1"     | null     | "ad2"       | 3
+        "fn1"     | null     | "ad3"       | 3
+        "fn2"     | null     | "ad1"       | 3
+        "fn2"     | null     | "ad2"       | 3
+        "fn2"     | null     | "ad3"       | 3
+        "fn3"     | null     | "ad1"       | 3
+        "fn3"     | null     | "ad2"       | 3
+        "fn3"     | null     | "ad3"       | 3
+
+        "fn1"     | null     | "ad1"       | 3
+        "fn1"     | null     | "ad2"       | 3
+        "fn1"     | null     | "ad3"       | 3
+        "fn2"     | null     | "ad1"       | 3
+        "fn2"     | null     | "ad2"       | 3
+        "fn2"     | null     | "ad3"       | 3
+        "fn3"     | null     | "ad1"       | 3
+        "fn3"     | null     | "ad2"       | 3
+        "fn3"     | null     | "ad3"       | 3
+
+        "fn1"     | "ln1"    | null        | 3
+        "fn1"     | "ln2"    | null        | 3
+        "fn1"     | "ln3"    | null        | 3
+        "fn2"     | "ln1"    | null        | 3
+        "fn2"     | "ln2"    | null        | 3
+        "fn2"     | "ln3"    | null        | 3
+        "fn3"     | "ln1"    | null        | 3
+        "fn3"     | "ln2"    | null        | 3
+        "fn3"     | "ln3"    | null        | 3
+
+        null      | null     | "ad1"       | 9
+        null      | null     | "ad2"       | 9
+        null      | null     | "ad3"       | 9
+        null      | "ln1"    | null        | 9
+        null      | "ln2"    | null        | 9
+        null      | "ln3"    | null        | 9
+        "fn1"     | null     | null        | 9
+        "fn2"     | null     | null        | 9
+        "fn3"     | null     | null        | 9
+        null      | null     | null        | 27
+    }
 }

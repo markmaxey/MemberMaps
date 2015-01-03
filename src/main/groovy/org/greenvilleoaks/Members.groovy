@@ -8,6 +8,8 @@ import org.greenvilleoaks.config.CsvColumnMappings
 import org.greenvilleoaks.storage.Csv
 import org.greenvilleoaks.view.RoleView
 
+import java.time.format.DateTimeFormatter
+
 /**
  * Load/Store all member information including cached and/or created
  * geocoded and/or distance information between two addresses
@@ -69,7 +71,8 @@ public final class Members {
         
         log.info("Storing enhanced membership information to '$fileName' ...")
 
-        List<Map<String, Object>> storedMemberListOfMaps = storeAggregatedMembers(memberBeans, fileName, config.membersCsvColumnMappings)
+        List<Map<String, Object>> storedMemberListOfMaps = 
+                storeAggregatedMembers(memberBeans, fileName, config.membersCsvColumnMappings, config.dateFormatter)
 
         log.info("Storing ${storedMemberListOfMaps.size()} enhanced membership")
     }
@@ -88,12 +91,13 @@ public final class Members {
     public static List<Map<String, Object>> storeAggregatedMembers(
             final List<MemberBean> memberBeans,
             final String fileName,
-            final CsvColumnMappings membersCsvColumnMappings) {
+            final CsvColumnMappings membersCsvColumnMappings,
+            final DateTimeFormatter dateTimeFormatter) {
         List<Map<String, Object>> storedMemberListOfMaps = []
         memberBeans.each { MemberBean memberBean ->
             Map<String, Object> alreadyAddedMemberMap = findMemberInListOfMemberMaps(storedMemberListOfMaps, memberBean, membersCsvColumnMappings)
             if (alreadyAddedMemberMap) {
-                aggregateMembersAtSameAddress(alreadyAddedMemberMap, memberBean, membersCsvColumnMappings)
+                aggregateMembersAtSameAddress(alreadyAddedMemberMap, memberBean, membersCsvColumnMappings, dateTimeFormatter)
             } else {
                 storedMemberListOfMaps << memberBean.toMap(membersCsvColumnMappings)
             }
@@ -109,10 +113,11 @@ public final class Members {
     protected static void aggregateMembersAtSameAddress(
             final Map<String, Object> alreadyAddedMemberMap, 
             final MemberBean memberBean,
-            final CsvColumnMappings membersCsvColumnMappings) {
+            final CsvColumnMappings membersCsvColumnMappings,
+            final DateTimeFormatter dateTimeFormatter) {
         alreadyAddedMemberMap.put(membersCsvColumnMappings.firstName, alreadyAddedMemberMap.get(membersCsvColumnMappings.firstName) + ", " + memberBean.firstName)
         alreadyAddedMemberMap.put(membersCsvColumnMappings.age,       alreadyAddedMemberMap.get(membersCsvColumnMappings.age)       + ", " + memberBean.age)
-        alreadyAddedMemberMap.put(membersCsvColumnMappings.birthday,  alreadyAddedMemberMap.get(membersCsvColumnMappings.birthday)  + ", " + memberBean.birthday)
+        alreadyAddedMemberMap.put(membersCsvColumnMappings.birthday,  alreadyAddedMemberMap.get(membersCsvColumnMappings.birthday)  + ", " + (memberBean.birthday ? memberBean.birthday.format(dateTimeFormatter) : "???"))
         alreadyAddedMemberMap.put(membersCsvColumnMappings.grade,     alreadyAddedMemberMap.get(membersCsvColumnMappings.grade)     + ", " + memberBean.grade)
     }
 
@@ -164,11 +169,7 @@ public final class Members {
      */
     protected void mergeBonusMembers(List<MemberBean> bonusMembers, List<MemberBean> members) {
         bonusMembers.each { MemberBean bonusMember ->
-            List<MemberBean> matchingMembers = members.findAll {
-                ((bonusMember.firstName == null) || bonusMember.firstName.equals(it.firstName)) ||
-                        ((bonusMember.lastName == null) || bonusMember.lastName.equals(it.lastName)) ||
-                        ((bonusMember.fullAddress == null) || bonusMember.fullAddress.equals(it.fullAddress))
-            }
+            List<MemberBean> matchingMembers = findAllMembersMatchingTheBonusMember(bonusMember, members)
 
             if (matchingMembers != null) {
                 matchingMembers.each { MemberBean matchingMember ->
@@ -176,23 +177,49 @@ public final class Members {
                         String propertyName  = it.name
                         if (!"class".equals(propertyName)) {
                             String propertyValue = bonusMember.getProperty(propertyName)
-
-                            // Don't merge the primary keys or properties whose values are not specified in the bonus information
-                            if ((!"firstName".equals(propertyName) ||
-                                    !"lastName".equals(propertyName) ||
-                                    !"address".equals(propertyName)  ||
-                                    !"city".equals(propertyName) ||
-                                    !"zip".equals(propertyName)
-                            ) && (propertyValue != null)) {
-                                matchingMember.setProperty(propertyName, propertyValue)
-                            }
+                            setBonusMemberProperty(matchingMember, propertyName, propertyValue)
                         }
                     }
                 }
             }
         }
     }
+    
+    
+    protected void setBonusMemberProperty(final MemberBean memberBean, final String propertyName, final String propertyValue) {
+        // Don't merge the primary keys or properties whose values are not specified in the bonus information
+        if (!"firstName".equals(propertyName) &&
+                !"lastName".equals(propertyName) &&
+                !"address".equals(propertyName)  &&
+                !"city".equals(propertyName) &&
+                !"zip".equals(propertyName) &&
+                (propertyValue != null)) {
+            try {
+                memberBean.setProperty(propertyName, propertyValue)
+            }
+            catch (Throwable ex) {
+                ex.printStackTrace()
+                throw new RuntimeException("'$propertyName' is an invalid bonus member property", ex)
+            }
+        }
+    }
+    
+    
 
+    /**
+     * @param bonusMember
+     * @param members
+     * @return A list of members matching the first name, last name, and full address of the "bonus" member.  If the
+     *         information wasn't specified for the bonus member, then that particular attribute is ignored in the match.
+     */
+    protected List<MemberBean> findAllMembersMatchingTheBonusMember(final MemberBean bonusMember, final List<MemberBean> members) {
+        List<MemberBean> matchingMembers = members.findAll {
+            ((bonusMember.firstName == null) || bonusMember.firstName.equals(it.firstName)) &&
+                    ((bonusMember.lastName == null) || bonusMember.lastName.equals(it.lastName)) &&
+                    ((bonusMember.fullAddress == null) || bonusMember.fullAddress.equals(it.fullAddress))
+        }
+        matchingMembers
+    }
 
 
     /**

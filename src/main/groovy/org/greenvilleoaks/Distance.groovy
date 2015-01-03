@@ -153,6 +153,9 @@ final class Distance {
                     }
                 }
             }
+            
+            if (minMember == null) throw new GoogleException("Cannot find the closest $role to '$minMember.directoryName'")
+            
             log.info("The closest $role to '$minMember.directoryName' is '$member.directoryName'")
 
             member.setProperty("Minimum Commute Distance In Meters to " + role, minDistance.distance.inMeters)

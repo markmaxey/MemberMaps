@@ -9,6 +9,8 @@ import org.greenvilleoaks.config.CsvColumnMappings
 import org.greenvilleoaks.storage.Csv
 import org.greenvilleoaks.storage.FileUtils
 
+import java.time.format.DateTimeFormatter
+
 /**
  * A perspective of the create.
  */
@@ -116,21 +118,25 @@ abstract class View {
     
     
     
-    public void store(final String baseDirName, final CsvColumnMappings csvColumnMappings) {
-        data.each() { String binName, List<MemberBean> memberBeans -> store(csvColumnMappings, baseDirName, binName, memberBeans) }
+    public void store(
+            final String baseDirName, 
+            final CsvColumnMappings csvColumnMappings,
+            final DateTimeFormatter dateTimeFormatter) {
+        data.each() { String binName, List<MemberBean> memberBeans -> store(csvColumnMappings, dateTimeFormatter, baseDirName, binName, memberBeans) }
     }
 
 
 
     protected void store(
-            final CsvColumnMappings csvColumnMappings, 
-            final String baseDirName, 
+            final CsvColumnMappings csvColumnMappings,
+            final DateTimeFormatter dateTimeFormatter,
+            final String baseDirName,
             final String binName, 
             final List<MemberBean> memberBeans) {
         String fileName = baseDirName + "\\" + name + "\\" + binName + ".csv"
 
         log.info("Storing $name view for $binName to '$fileName' ...")
 
-        Members.storeAggregatedMembers(memberBeans, fileName, csvColumnMappings)
+        Members.storeAggregatedMembers(memberBeans, fileName, csvColumnMappings, dateTimeFormatter)
     }
 }

@@ -82,6 +82,6 @@ class Views {
     private void storeViewsOnDisk(
             final Config config,
             final Collection<View> views) {
-        views.each { it.store(config.memberStatsDirName, config.membersCsvColumnMappings) }
+        views.each { it.store(config.memberStatsDirName, config.membersCsvColumnMappings, config.dateFormatter) }
     }
 }
