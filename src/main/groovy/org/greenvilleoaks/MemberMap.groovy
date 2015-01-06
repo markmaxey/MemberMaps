@@ -35,17 +35,16 @@ class MemberMap {
 
         Map<String, View> views = new Views().createAndStoreViews(config, members)
 
-
-        /*
-        new Workflow(
-                members,
-                views,
-                new NetHttpTransport(),
-                new GsonFactory(),
-                config.membersCsvColumnMappings,
-                config.centralPointName,
-                new File(config.google.jsonKeyFileName)).run(config.google.projectId)
-        */
+        if (System.getProperty("Map", null)) {
+            new Workflow(
+                    members,
+                    views,
+                    new NetHttpTransport(),
+                    new GsonFactory(),
+                    config.membersCsvColumnMappings,
+                    config.centralPointName,
+                    new File(config.google.jsonKeyFileName)).run(config.google.projectId)
+        }
     }
 
 

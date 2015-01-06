@@ -18,3 +18,13 @@ Generate JSON Key
 no need to add OAuth client id as a user (it is automatically done for you)
 
 Quotas can be explored via project -> APIs -> [SERVICE] -> Quota tab
+
+Go to
+
+https://mapsengine.google.com/admin
+
+and on the right hand side there is a gear icon with a pull down selection.  Choose "Manage Users".  From there, add the client_email.  This is the Google APIs service account found at
+
+https://cloud.google.com/console
+
+under the permissions tab.
