@@ -1,0 +1,19 @@
+<div class='googeb-info-window' style='font-family: sans-serif'>
+<h1><b>Name</b></h1>
+<b>Directory Name:</b> {Directory Name}<br>
+<b>Last Name:</b> {Last Name}<br>
+<b>Preferred Name:</b> {Preferred Name}<br>
+<h1><b>Info</b></h1>
+<b>Formatted Address:</b> {Formatted Address}<br>
+<b>Number in Household:</b> {Number in Household}<br>
+<b>Birth Date:</b> {Birth Date}<br>
+<b>Age:</b> {Age}<br>
+<b>School Grade:</b> {School Grade}<br>
+<b>Role:</b> {Role}<br>
+<h1><b>Commute</b></h1>
+<b>Distance to Greenville Oaks:</b> {Commute Distance to Greenville Oaks Church of Christ}<br>
+<b>Time to Greenville Oaks:</b> {Commute Time to Greenville Oaks Church of Christ}<br>
+<b>Minimum Distance to Small Group Leader:</b> {Minimum Commute Distance to Small Group Leader}<br>
+<b>Minimum Time to Small Group Leader:</b> {Minimum Commute Time to Small Group Leader}<br>
+<b>Closest Small Group Leader:</b> {Minimum Commute to Small Group Leader}<br>
+</div>
