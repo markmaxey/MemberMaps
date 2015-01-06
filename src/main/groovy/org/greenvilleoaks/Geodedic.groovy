@@ -7,6 +7,8 @@ import groovy.util.logging.Log4j
 import org.greenvilleoaks.beans.MemberBean
 import org.greenvilleoaks.view.View
 
+import java.lang.reflect.UndeclaredThrowableException
+
 @Log4j
 final class Geodedic {
     /** The address of a central location we want to find the distance to for each member */
@@ -50,13 +52,22 @@ final class Geodedic {
             final Distance distance) {
         log.info("Geocoding members addresses ...")
 
-        // Geocode any addresses that were missing from the Geodedic CSV file
-        // Use JDK 8 fork/join to work on each member in a different thread in parallel efficiently
-        members.parallelStream().forEach({member -> 
-            create(member, roleView, memberRoleCommute, geodedicAddresses, distanceCache, distance)
-        })
+        try {
+            // Geocode any addresses that were missing from the Geodedic CSV file
+            // Use JDK 8 fork/join to work on each member in a different thread in parallel efficiently
+            members.parallelStream().forEach({member ->
+                create(member, roleView, memberRoleCommute, geodedicAddresses, distanceCache, distance)
+            })
 
-        log.info("Finished geocoding members addresses")
+            log.info("Finished geocoding members addresses")
+        }
+        catch (UndeclaredThrowableException ex) {
+            log.error("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+            log.error(ex.undeclaredThrowable.message, ex.undeclaredThrowable)
+            log.error("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+            
+            throw ex
+        }
     }
 
 

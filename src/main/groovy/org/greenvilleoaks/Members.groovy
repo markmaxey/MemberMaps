@@ -1,13 +1,15 @@
 package org.greenvilleoaks
 
-import org.greenvilleoaks.beans.DistanceBean
+import com.google.maps.errors.OverQueryLimitException
 import groovy.util.logging.Log4j
+import org.greenvilleoaks.beans.DistanceBean
 import org.greenvilleoaks.beans.MemberBean
 import org.greenvilleoaks.config.Config
 import org.greenvilleoaks.config.CsvColumnMappings
 import org.greenvilleoaks.storage.Csv
 import org.greenvilleoaks.view.RoleView
 
+import java.lang.reflect.UndeclaredThrowableException
 import java.time.format.DateTimeFormatter
 
 /**
@@ -31,15 +33,29 @@ public final class Members {
 
         List<DistanceBean> distanceCache = loadDistanceCacheData()
 
-        createGeodedicInfo4Members(members, geodedicAddresses, distanceCache)
-        
-        storeMembers(members)
+        try {
+            createGeodedicInfo4Members(members, geodedicAddresses, distanceCache)
 
-        storeGeodedicInfo(geodedicAddresses)
+            storeMembers(members)
 
-        storeDistanceCacheData(distanceCache)
+            storeGeodedicInfo(geodedicAddresses)
 
-        return members
+            storeDistanceCacheData(distanceCache)
+
+            return members
+        }
+        catch (Exception ex) {
+            log.error("***********************************************")
+            log.error(ex.message, ex)
+            if (ex.cause) log.error(ex.cause.message, ex.cause)
+            log.error("***********************************************")
+
+            storeGeodedicInfo(geodedicAddresses)
+            
+            storeDistanceCacheData(distanceCache)
+            
+            System.exit(1)
+        }
     }
 
 
@@ -198,8 +214,9 @@ public final class Members {
                 memberBean.setProperty(propertyName, propertyValue)
             }
             catch (Throwable ex) {
-                ex.printStackTrace()
-                throw new RuntimeException("'$propertyName' is an invalid bonus member property", ex)
+                String message = "'$propertyName' is an invalid bonus member property"
+                log.error(message, ex)
+                throw new RuntimeException(message, ex)
             }
         }
     }
