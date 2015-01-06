@@ -1,3 +1,5 @@
+// This is an example configuration file that can be given as the first (and only) command line paramter to MemberMap
+
 google {
    /** REQUIRED: The Google project name */
     applicationName = ""
