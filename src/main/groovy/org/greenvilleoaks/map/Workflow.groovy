@@ -4,16 +4,19 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.api.client.http.HttpRequestInitializer
 import com.google.api.client.http.HttpTransport
 import com.google.api.client.http.InputStreamContent
+import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.JsonFactory
+import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.mapsengine.MapsEngine
 import com.google.api.services.mapsengine.MapsEngineScopes
+import com.google.api.services.mapsengine.model.Layer
 import com.google.api.services.mapsengine.model.Project
-import com.google.api.services.mapsengine.model.ProjectsListResponse
 import com.google.api.services.mapsengine.model.Schema
 import com.google.api.services.mapsengine.model.Table
 import com.google.maps.clients.BackOffWhenRateLimitedRequestInitializer
 import com.google.maps.clients.HttpRequestInitializerPipeline
 import groovy.util.logging.Log4j
+import org.greenvilleoaks.config.Config
 import org.greenvilleoaks.config.CsvColumnMappings
 import org.greenvilleoaks.storage.Csv
 import org.greenvilleoaks.beans.MemberBean
@@ -33,6 +36,28 @@ final class Workflow {
     private final Map<String, View> views
     private final CsvColumnMappings csvColumnMappings
 
+    private final ProjectAdapter projectAdapter
+    private final LayerAdapter   layerWrapper
+    private final MapAdapter     mapWrapper
+    private final TablesAdapter  tablesWrapper
+
+    
+    public static void main(String[] argv) {
+        Config config = Config.loadConfig(argv)
+        
+        Workflow workflow = new Workflow(
+                null, // TODO
+                null, // TODO
+                new NetHttpTransport(),
+                new GsonFactory(),
+                config.membersCsvColumnMappings,
+                config.centralPointName,
+                new File(config.google.jsonKeyFileName))
+        
+        workflow.run(config.google.projectId)
+    }
+    
+    
     public Workflow(
             final List<MemberBean> members,
             final Map<String, View> views,
@@ -65,10 +90,15 @@ final class Workflow {
         engine = new MapsEngine.Builder(httpTransport, jsonFactory, requestInitializers)
                 .setApplicationName(applicationName)
                 .build();
+        
+        projectAdapter = new ProjectAdapter(engine: engine)
+        layerWrapper   = new LayerAdapter  (engine: engine)
+        mapWrapper     = new MapAdapter    (engine: engine)
+        tablesWrapper  = new TablesAdapter (engine: engine)
     }
 
 
-    private void enableHttpLogging() {
+    private static void enableHttpLogging() {
         ConsoleHandler consoleHandler = new ConsoleHandler()
         consoleHandler.setLevel(Level.FINEST)
         Logger.getLogger(HttpTransport.class.getName()).setLevel(Level.FINEST)
@@ -77,44 +107,21 @@ final class Workflow {
 
 
     public void run(final String projectId) {
-        findAllProjects()
-        
+        List<Project> projects = projectAdapter.findAllProjects()
+        List<Table>   tables   = tablesWrapper.findAllTables()
+        List<Layer>   layers   = layerWrapper.findAllLayers()
+        List<Map>     maps     = mapWrapper.findAllMaps()
+
+/*
         String fileName = System.properties.getProperty("user.home") + "\\Documents\\GO_Members_Map\\dummy.txt"
-        log.info("Creating an empty table in Maps Engine, under project ID " + projectId);
+        log.info("Creating an empty table in Maps Engine, under projectAdapter ID " + projectId);
         Table table = createTable(projectId, [fileName], "goTableName", "goTableDescription", "Unique Id", ["tag1, tag2"]);
         log.info("Table created, ID is: " + table.getId());
 
         log.info("Uploading the data files.");
         uploadFile(table, createCsvInputStream(members, csvColumnMappings), fileName, "text/csv");
         log.info("Done.");
-
-        def tableList = engine.tables().list()
-        println tableList
-    }
-
-
-    private List<Project> findAllProjects() {
-        log.info("Creating list of all projects readable by the current user ...")
-        ProjectsListResponse projectList = engine.projects().list().execute()
-        List<Project> allProjects =  projectList.getProjects()
-        
-        if (allProjects.isEmpty()) {
-            String msg = "No projects were found that are readable by the current user."
-            throw new RuntimeException(msg)
-        }
-        else {
-            log.info("All projects readable by the current user: ")
-            projectList.getProjects().each { Project project ->
-                log.info("\tname='" + project.getName() + "' id='" + project.getId() + "'")
-            }
-        }
-        
-        return allProjects
-    }
-
-
-    private void deleteAll() {
-        engine.tables().delete("ID")
+*/
     }
 
 

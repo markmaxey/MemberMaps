@@ -24,7 +24,7 @@ class MemberMap {
      * @param argv
      */
     public static void main(final String[] argv) {
-        Config config = loadConfig(argv)
+        Config config = Config.loadConfig(argv)
         
         addFileLogAppender(config.memberStatsDirName)
         
@@ -63,24 +63,5 @@ class MemberMap {
         fileAppender.activateOptions()
 
         Logger.getRootLogger().addAppender(fileAppender)
-    }
-
-
-    private static Config loadConfig(final String[] argv) {
-        Config config
-        if (argv.length == 0) {
-            config = new Config()
-        }
-        else {
-            File configFile = new File(argv[0])
-            if (configFile.exists()) {
-                config = new ConfigSlurper().parse(new URL("file:///" + argv[0]))
-            }
-            else {
-                config = new Config()
-            }
-        }
-        
-        return config.init()
     }
 }

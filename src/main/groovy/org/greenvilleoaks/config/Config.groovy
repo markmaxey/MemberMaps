@@ -94,4 +94,23 @@ class Config {
 
         return this
     }
+
+
+    public static Config loadConfig(final String[] argv) {
+        Config config
+        if (argv.length == 0) {
+            config = new Config()
+        }
+        else {
+            File configFile = new File(argv[0])
+            if (configFile.exists()) {
+                config = new ConfigSlurper().parse(new URL("file:///" + argv[0]))
+            }
+            else {
+                config = new Config()
+            }
+        }
+
+        return config.init()
+    }
 }
