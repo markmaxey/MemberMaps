@@ -61,7 +61,7 @@ public final class Members {
 
 
     /** Load member information from a file */
-    private List<MemberBean> loadMembers() {
+    public List<MemberBean> loadMembers() {
         log.info("Loading members from '$config.membersCsvFileName' ...")
         List<MemberBean> members = []
 

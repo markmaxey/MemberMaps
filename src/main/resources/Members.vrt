@@ -1,0 +1,31 @@
+<OGRVRTDataSource>
+    <OGRVRTLayer name="Members">
+    <SrcDataSource relativeToVRT="1">Members.csv</SrcDataSource>
+    <GeometryType>wkbPoint</GeometryType>
+    <LayerSRS>WGS84</LayerSRS>
+    <GeometryField reportSrcColumn="false" encoding="PointFromColumns" x="Longitude" y="Latitude"/>
+      <Field name="Directory Name" src="Directory Name" type="String" />
+      <Field name="Last Name" src="Last Name" type="String" />
+      <Field name="Preferred Name" src="Preferred Name" type="String" />
+      <Field name="Address" src="Address" type="String" />
+      <Field name="City" src="City" type="String" />
+      <Field name="Zip Code" src="Zip Code" type="Integer" />
+      <Field name="Full Address" src="Full Address" type="String" />
+      <Field name="Formatted Address" src="Formatted Address" type="String" />
+      <Field name="Number in Household" src="Number in Household" type="Integer" />
+      <Field name="Birth Date" src="Birth Date" type="String" />
+      <Field name="Age" src="Age" type="String" />
+      <Field name="School Grade" src="School Grade" type="String" />
+      <Field name="Role" src="Role" type="String" />
+      <Field name="Unique Id" src="Unique Id" type="String" />
+      <Field name="Commute Distance In Meters to Greenville Oaks Church of Christ" src="Commute Distance In Meters to Greenville Oaks Church of Christ" type="Integer" />
+      <Field name="Commute Distance to Greenville Oaks Church of Christ" src="Commute Distance to Greenville Oaks Church of Christ" type="String" />
+      <Field name="Commute Time In Seconds to Greenville Oaks Church of Christ" src="Commute Time In Seconds to Greenville Oaks Church of Christ" type="Integer" />
+      <Field name="Commute Time to Greenville Oaks Church of Christ" src="Commute Time to Greenville Oaks Church of Christ" type="String" />
+      <Field name="Minimum Commute Distance In Meters to Small Group Leader" src="Minimum Commute Distance In Meters to Small Group Leader" type="Integer" />
+      <Field name="Minimum Commute Distance to Small Group Leader" src="Minimum Commute Distance to Small Group Leader" type="String" />
+      <Field name="Minimum Commute Time In Seconds to Small Group Leader" src="Minimum Commute Time In Seconds to Small Group Leader" type="Integer" />
+      <Field name="Minimum Commute Time to Small Group Leader" src="Minimum Commute Time to Small Group Leader" type="String" />
+      <Field name="Minimum Commute to Small Group Leader" src="Minimum Commute to Small Group Leader" type="String" />
+    </OGRVRTLayer>
+</OGRVRTDataSource>

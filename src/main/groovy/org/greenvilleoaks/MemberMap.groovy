@@ -2,17 +2,14 @@ package org.greenvilleoaks
 
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
+import com.google.api.services.mapsengine.MapsEngine
 import groovy.util.logging.Log4j
-import org.apache.log4j.FileAppender
-import org.apache.log4j.Level
-import org.apache.log4j.Logger
-import org.apache.log4j.PatternLayout
 import org.greenvilleoaks.beans.MemberBean
 import org.greenvilleoaks.config.Config
+import org.greenvilleoaks.map.MapEngineFactory
 import org.greenvilleoaks.map.Workflow
-import org.greenvilleoaks.storage.FileUtils
-import org.greenvilleoaks.storage.Spreadsheet
-import org.greenvilleoaks.view.*
+import org.greenvilleoaks.view.View
+import org.greenvilleoaks.view.Views
 
 /**
  * This is the "main" class containing all the control logic.
@@ -26,7 +23,8 @@ class MemberMap {
     public static void main(final String[] argv) {
         Config config = Config.loadConfig(argv)
         
-        addFileLogAppender(config.memberStatsDirName)
+        LogSetup.addFileLogAppender(config.memberStatsDirName)
+        LogSetup.enableHttpLogging()
         
         log.info("Generating a members map and spreadsheet ...")
         log.info(config.toString())
@@ -36,32 +34,15 @@ class MemberMap {
         Map<String, View> views = new Views().createAndStoreViews(config, members)
 
         if (System.getProperty("Map", null)) {
-            new Workflow(
-                    members,
-                    views,
+            MapsEngine mapsEngine = new MapEngineFactory().createMapEngine(
                     new NetHttpTransport(),
                     new GsonFactory(),
-                    config.membersCsvColumnMappings,
                     config.centralPointName,
-                    new File(config.google.jsonKeyFileName)).run(config.google.projectId)
+                    new File(config.google.jsonKeyFileName))
+                    
+            Workflow workflow = new Workflow(members,views, config.membersCsvColumnMappings, mapsEngine)
+
+            workflow.run(config.google.mapsEngineProjectId, config.memberStatsDirName + "\\" + "Members.csv")
         }
-    }
-
-
-    private static void addFileLogAppender(final String dirName) {
-        String fileName = dirName + "\\" + "MemberMap.log"
-
-        if (!FileUtils.createParentDirs(fileName))
-            throw new RuntimeException("Can't create the parent directories for '$fileName'")
-        
-        FileAppender fileAppender = new FileAppender()
-        fileAppender.setName("FileLogger")
-        fileAppender.setFile(fileName)
-        fileAppender.setLayout(new PatternLayout("%d %-5p %c{1} - %m%n"))
-        fileAppender.setThreshold(Level.DEBUG)
-        fileAppender.setAppend(true)
-        fileAppender.activateOptions()
-
-        Logger.getRootLogger().addAppender(fileAppender)
     }
 }

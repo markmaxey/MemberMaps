@@ -37,7 +37,7 @@ class Auth {
         if (!secretsFile.exists()) {
             log.error("Private key file not found.\n"
                     + "Follow the instructions at https://developers.google"
-                    + ".com/maps-engine/documentation/oauth/serviceaccount#creating_a_service_account\n"
+                    + ".com/maps-mapsEngine/documentation/oauth/serviceaccount#creating_a_service_account\n"
                     + "and save the generated JSON key to " + secretsFile.getAbsolutePath());
             System.exit(1);
         }

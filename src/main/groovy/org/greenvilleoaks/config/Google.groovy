@@ -8,14 +8,11 @@ class Google {
     /** The Google API context used for all Google API calls */
     public GeoApiContext context = new GeoApiContext()
 
-    /** The Google projectAdapter name */
-    public String applicationName = "Google/GreenvilleOaks-1.0"
+    /** The Google Maps Engine Project ID */
+    public String mapsEngineProjectId = "01824222381788524396"
 
-    /** The Google projectAdapter name */
-    public String projectId = "greenvilleoaks"
-
-    /** The Google projectAdapter number */
-    public String projectNumber = "297047284747"
+    /** The Google APIs project number */
+    public String apisProjectNumber = "297047284747"
 
     /** The public access key created for the organization required to authenticate to Google Map APIs */
     public String apiKey = "AIzaSyBqAYLqYrV9ArcEsU3MNi3ffHbf-BQ3F1s"

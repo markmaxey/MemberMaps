@@ -27,7 +27,7 @@ class Views {
      * @param members
      * @return various perspectives of the create
      */
-    private Map<String, View> createViews(
+    public Map<String, View> createViews(
             final Config config,
             final List<MemberBean> members) {
         Map<String, View> views = [:]
