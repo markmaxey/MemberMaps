@@ -1,4 +1,4 @@
-package org.greenvilleoaks
+package org.greenvilleoaks.view
 
 import org.greenvilleoaks.beans.MemberBean
 import org.greenvilleoaks.config.Config
@@ -196,7 +196,7 @@ class ViewSpec extends Specification {
 
         expect:
         view.name == config.membersCsvColumnMappings.age
-        view.data.get("5").size()  == 1
+        view.data.get(" 5").size()  == 1
         view.data.get("10").size() == 1
         view.data.get("15").size() == 1
         view.data.get("20s").size() == 2
@@ -209,5 +209,23 @@ class ViewSpec extends Specification {
         view.data.get("90s").size() == 2
         view.data.get("100s").size() == 3
         view.data.get(View.NULL_BIN_NAME).size() == 2
+    }
+    
+    
+    def "Grade Sort Order"() {
+        setup:
+        View view = new GradeView(config.membersCsvColumnMappings.grade,
+                memberList(config.membersCsvColumnMappings.grade, ["12th", "Pre-School 1", "2nd", "Kindergarten", "Graduated", "Pre-School 2", "1st"]))
+        List<String> keys = view.sortedDataKeys()
+        
+        expect:
+        keys.size().equals(7)
+        keys.get(0) == "Pre-School 1"
+        keys.get(1) == "Pre-School 2"
+        keys.get(2) == "Kindergarten"
+        keys.get(3) == "1st"
+        keys.get(4) == "2nd"
+        keys.get(5) == "12th"
+        keys.get(6) == "Graduated"
     }
 }

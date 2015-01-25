@@ -42,7 +42,12 @@ class MemberMap {
                     
             Workflow workflow = new Workflow(members,views, config.membersCsvColumnMappings, mapsEngine)
 
-            workflow.run(config.google.mapsEngineProjectId, config.memberStatsDirName + "\\" + "Members.csv")
+            workflow.run(
+                    config.google.mapsEngineProjectId, 
+                    config.memberStatsDirName + "\\" + "Members.csv",
+                    config.publicMap,
+                    config.privateMap
+            )
         }
     }
 }

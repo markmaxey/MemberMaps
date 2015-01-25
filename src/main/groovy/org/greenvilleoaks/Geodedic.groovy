@@ -1,10 +1,12 @@
 package org.greenvilleoaks
 
+import com.google.maps.model.AddressComponent
 import com.google.maps.model.AddressComponentType
-import org.greenvilleoaks.beans.DistanceBean
 import com.google.maps.model.GeocodingResult
 import groovy.util.logging.Log4j
+import org.greenvilleoaks.beans.DistanceBean
 import org.greenvilleoaks.beans.MemberBean
+import org.greenvilleoaks.storage.FileUtils
 import org.greenvilleoaks.view.View
 
 import java.lang.reflect.UndeclaredThrowableException
@@ -42,6 +44,7 @@ final class Geodedic {
      * @param geodedicAddresses    In/Out: Geodedic information for addresses (not fully populated with member info).
      *                             This list can be prepopulated with cached results.  It will be updated with all
      *                             the geodedic information for all addresses of all members.
+     * @return  A string containing the log of addresses with conflicts, mismatches, or issues
      */
     public void create(
             final List<MemberBean> members,
@@ -49,14 +52,16 @@ final class Geodedic {
             final List<String> memberRoleCommute,
             final List<MemberBean> geodedicAddresses,
             final List<DistanceBean> distanceCache,
-            final Distance distance) {
+            final Distance distance,
+            final String badAddressesFileName=null) {
         log.info("Geocoding members addresses ...")
+        StringBuffer badAddresses = new StringBuffer()
 
         try {
             // Geocode any addresses that were missing from the Geodedic CSV file
             // Use JDK 8 fork/join to work on each member in a different thread in parallel efficiently
             members.parallelStream().forEach({member ->
-                create(member, roleView, memberRoleCommute, geodedicAddresses, distanceCache, distance)
+                create(member, roleView, memberRoleCommute, geodedicAddresses, distanceCache, distance, badAddresses)
             })
 
             log.info("Finished geocoding members addresses")
@@ -68,6 +73,20 @@ final class Geodedic {
             
             throw ex
         }
+        finally {
+            if (badAddressesFileName) logBadAddresses(badAddresses.toString(), badAddressesFileName)
+        }
+    }
+
+
+
+    private void logBadAddresses(String badAddresses, String fileName) {
+        log.warn("Logging to disk the following questionable addresses to $fileName:\n" + badAddresses)
+
+        FileUtils.createParentDirs(fileName)
+        new File(fileName).write(badAddresses)
+
+        log.info("Finished logging bad addresses to disk")
     }
 
 
@@ -81,6 +100,7 @@ final class Geodedic {
      * @param geodedicAddresses    In/Out: Geodedic information for addresses (not fully populated with member info).
      *                             This list can be prepopulated with cached results.  It will be updated with all
      *                             the geodedic information for all addresses of all members.
+     * @param badAddresses         The log of addresses with conflicts, mismatches, or issues
      */
     public void create(
             final MemberBean member,
@@ -88,7 +108,8 @@ final class Geodedic {
             final List<String> memberRoleCommute,
             final List<MemberBean> geodedicAddresses,
             final List<DistanceBean> distanceCache,
-            final Distance distance) {
+            final Distance distance,
+            final StringBuffer badAddresses) {
         log.info("Creating geodedic information for '" + member.directoryName + "' in thread " + Thread.currentThread().toString())
         MemberBean geodedicInfo
         synchronized (geodedicAddresses) {
@@ -109,6 +130,9 @@ final class Geodedic {
                 }
             }
             catch (GoogleException ex) {
+                badAddresses.append("\t")
+                badAddresses.append(ex.message)
+                badAddresses.append("\n")
                 log.error(ex.message)
             }
         }
@@ -198,7 +222,7 @@ final class Geodedic {
     
     /** Throw an exception if the given zip code doesn't match that of the member (if one was provided) */
     protected void verifyZipReturnedMatchesMemberZip(String googleZip, Integer memberZip, String fullAddress) {
-        if (!googleZip || "".equals(googleZip) || !googleZip.equals(Integer.toString(memberZip))) {
+        if (googleZip && memberZip && !"".equals(memberZip) && !"".equals(googleZip) && !googleZip.equals(Integer.toString(memberZip))) {
             throw new GoogleException("When trying to geocode '$fullAddress', Google returned a zip of '$googleZip' which didn't match the zip code provided '$memberZip'")
         }
     }
@@ -211,10 +235,25 @@ final class Geodedic {
      */
     protected String extractZipCodeFromGeocodeResults(final GeocodingResult[] results) {
         // Extract the postal code from the returned address
-        String returnedZip = results[0].addressComponents.find {
+        AddressComponent addressComponent = results[0].addressComponents.find {
             it.types.find { AddressComponentType.POSTAL_CODE.equals(it) }
-        }.longName
-        returnedZip
+        }
+        
+        if (!addressComponent || !addressComponent.longName || "".equals(addressComponent.longName)) {
+            String msg = "Cannot find an addressComponent that has a POSTAL_CODE"
+            StringBuilder stringBuilder = new StringBuilder("$msg:\n")
+            results.each { GeocodingResult result ->
+                stringBuilder.append("\tresult\n")
+                result.addressComponents.each { AddressComponent ac ->
+                    stringBuilder.append("\t\taddressComponent\n")
+                    ac.types.each { stringBuilder.append("\t\t\ttype=${it.toString()} longName=${ac.longName} shortName=${ac.shortName}\n") }
+                }
+            }
+            log.warn(stringBuilder.toString())
+            return null
+        }
+        
+        return addressComponent.longName
     }
 
 

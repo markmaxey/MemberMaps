@@ -51,8 +51,8 @@ google {
         config.memberRoleCommuteList[1] == "1"
         config.memberRoleCommuteList[2] == "2"
         
-        config.google.mapsEngineProjectId     == 'greenvilleoaks'
-        config.google.apisProjectNumber == "297047284747"
+        config.google.mapsEngineProjectId == '01824222381788524396'
+        config.google.apisProjectNumber   == "297047284747"
     }
     
     

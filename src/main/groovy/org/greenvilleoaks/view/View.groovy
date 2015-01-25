@@ -1,13 +1,16 @@
 package org.greenvilleoaks.view
 
+import com.google.api.services.mapsengine.model.DisplayRule
+import com.google.api.services.mapsengine.model.PointStyle
+import com.google.api.services.mapsengine.model.VectorStyle
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import groovy.util.logging.Log4j
 import org.greenvilleoaks.Members
 import org.greenvilleoaks.beans.MemberBean
 import org.greenvilleoaks.config.CsvColumnMappings
-import org.greenvilleoaks.storage.Csv
-import org.greenvilleoaks.storage.FileUtils
+import org.greenvilleoaks.map.LayerAdapter
+import org.greenvilleoaks.map.StringOperatorEnum
 
 import java.time.format.DateTimeFormatter
 
@@ -28,11 +31,14 @@ abstract class View {
 
     /** The column headers and map keys */
     final String[] headers = ["Category", "Number of Members", "Percentage of Members"]
+    
+    final Optional<Comparator> comparator
 
 
-    public View(final String name, final List<MemberBean> members) {
+    public View(final String name, final List<MemberBean> members, final Comparator comparator=null) {
         this.name = name
         this.data = createViewData(members)
+        this.comparator = (comparator == null) ? Optional.empty() : Optional.of(comparator)
     }
 
 
@@ -46,7 +52,92 @@ abstract class View {
     abstract Map<String, List<MemberBean>> createViewData(final List<MemberBean> members);
 
 
+    /**
+     * This method defines the display rules for the view when creating a map layer.
+     *
+     * @param layerAdapter    The adapter layer to Google's Java Client
+     * @param pointStyle      The point style
+     * @return one list of display rules per category/bin
+     */
+    abstract Map<String, List<DisplayRule>> createDisplayRules(
+            final CsvColumnMappings csvColumnMappings,
+            final LayerAdapter layerAdapter, 
+            final PointStyle pointStyle)
 
+    
+
+    /** Allow each view to customize its own style if desired.  This method in the base class provides the default style. */
+    public VectorStyle createVectorStyle(
+            final LayerAdapter layerAdapter,
+            final List<DisplayRule> displayRules,
+            final String featureInfoContent
+    ) {
+        layerAdapter.createStyle(displayRules, featureInfoContent)
+    }
+
+
+
+    protected List<String> sortedDataKeys() {
+        List keys = []
+        data.keySet().each { keys << it }
+        Collections.sort(keys)
+        return keys
+    }
+
+
+    protected TreeMap<String, List<DisplayRule>> constructCategory2DisplayRules() {
+        Map<String, List<DisplayRule>> category2DisplayRules = comparator.isPresent() ? new TreeMap<String, List<DisplayRule>>(comparator.get()) : new TreeMap<String, List<DisplayRule>>()
+        category2DisplayRules
+    }
+
+
+    protected Map<String, List<DisplayRule>> createIdentityDisplayRules(
+            final String csvColumnMapping,
+            final LayerAdapter layerAdapter,
+            final PointStyle pointStyle) {
+        TreeMap<String, List<DisplayRule>> category2DisplayRules = constructCategory2DisplayRules()
+
+        sortedDataKeys().each { String category ->
+            if (!NULL_BIN_NAME.equals(category)) {
+                category2DisplayRules.put(
+                        category,
+                        [
+                                layerAdapter.createDisplayRule(
+                                        pointStyle,
+                                        [layerAdapter.createFilter(csvColumnMapping, StringOperatorEnum.equals, category)]
+                                )
+                        ])
+            }
+        }
+
+        return category2DisplayRules
+    }
+
+
+    protected Map<String, List<DisplayRule>> createContainsDisplayRules(
+            final String csvColumnMapping,
+            final LayerAdapter layerAdapter,
+            final PointStyle pointStyle) {
+        TreeMap<String, List<DisplayRule>> category2DisplayRules = constructCategory2DisplayRules()
+
+        sortedDataKeys().each { String category ->
+            if (!NULL_BIN_NAME.equals(category)) {
+                category2DisplayRules.put(
+                        category,
+                        [
+                                layerAdapter.createDisplayRule(
+                                        pointStyle,
+                                        [layerAdapter.createFilter(csvColumnMapping, StringOperatorEnum.contains, category)]
+                                )
+                        ])
+            }
+        }
+
+        return category2DisplayRules
+    }
+
+    
+    
     /**
      * @return histogram statistics of the member's perspective
      */

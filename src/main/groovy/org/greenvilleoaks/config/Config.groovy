@@ -7,11 +7,15 @@ import java.time.format.DateTimeFormatter
 
 @ToString(includeNames = true, includeFields = true)
 class Config {
+    // TODO: Move GO specific values out to a config file
     /** The name of a central location we want to find the distance to for each member */
     public String centralPointName    = "Greenville Oaks Church of Christ"
 
     public Google google = new Google()
     public CsvColumnMappings membersCsvColumnMappings = new CsvColumnMappings().init(centralPointName)
+
+    public MapInfo publicMap  = new MapInfo(true)
+    public MapInfo privateMap = new MapInfo(false)
     
     /** The name of the input file containing membership information */
     public String membersCsvFileName =
@@ -20,6 +24,9 @@ class Config {
     /** The name of the (optional) input file containing additional "bonus" membership information */
     public String bonusMembersCsvFileName =
             System.properties.getProperty("user.home") + "\\Documents\\GO_Members_Map\\BonusMembers.csv"
+
+    /** The relative name of the file containing the questionable addresses, i.e., those where the input didn't match Google's output */
+    public String badAddressesFileName = "Bad Addresses.txt"
 
     /** The name of the input/output cache file containing cached geodedic information
      * for the member's addresses (not full membership information) */
@@ -91,6 +98,9 @@ class Config {
             geodedicCsvHeaderList.add("Minimum Commute Time to " + role)
             geodedicCsvHeaderList.add("Minimum Commute to " + role)
         }
+
+        publicMap.init(centralPointName,  memberRoleCommuteList)
+        privateMap.init(centralPointName, memberRoleCommuteList)
 
         return this
     }

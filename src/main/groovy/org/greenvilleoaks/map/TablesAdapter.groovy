@@ -128,6 +128,16 @@ class TablesAdapter {
             final String tableId, 
             final LayerAdapter layerAdapter,
             final MapAdapter mapAdapter) throws IOException {
+        deleteLayersAssociatedWithTable(tableId, layerAdapter, mapAdapter)
+
+        log.info("Deleting '$tableId' ...")
+        engine.tables().delete(tableId).execute();
+        log.info("Deleted '$tableId' ...")
+    }
+
+
+    /** Delete all the layers associated with a given table */
+    public void deleteLayersAssociatedWithTable(String tableId, LayerAdapter layerAdapter, MapAdapter mapAdapter) {
         log.info("Finding layers belonging to table.");
         ParentsListResponse tableParents = engine.tables().parents().list(tableId).execute();
         log.info("Layers retrieved.");
@@ -139,11 +149,7 @@ class TablesAdapter {
         }
 
         // We need to delete layers before we can delete the table.
-        layerAdapter.deleteLayers(allLayerIds, mapAdapter);
-
-        log.info("Deleting '$tableId' ...")
-        engine.tables().delete(tableId).execute();
-        log.info("Deleted '$tableId' ...")
+        layerAdapter.deleteLayersByLayerId(allLayerIds, mapAdapter);
     }
 
 
@@ -153,7 +159,7 @@ class TablesAdapter {
             final String tableName,
             final LayerAdapter layerAdapter,
             final MapAdapter mapAdapter) {
-        Table table = findTable(tables, tableName)
+        Table table = findTableByName(tables, tableName)
         
         if (table) {
             log.info("Found '$tableName'")
@@ -170,7 +176,7 @@ class TablesAdapter {
             final String tableName,
             final LayerAdapter layerAdapter,
             final MapAdapter mapAdapter) {
-        Table table = findTable(tableName)
+        Table table = findTableByName(tableName)
         if (table) {
             log.info("Found '$tableName'")
 
@@ -190,18 +196,28 @@ class TablesAdapter {
     }
 
 
-    public Table findTable(final String tableName) {
+    public Table findTableById(final String tableId) {
+        return findAllTables().find { it.getId().equals(tableId) }
+    }
+
+
+    public Table findTableById(final List<Table> tables, final String tableId) {
+        return tables.find { it.getName().equals(tableId) }
+    }
+
+
+    public Table findTableByName(final String tableName) {
         return findAllTables().find { it.getName().equals(tableName) }
     }
 
 
-    public Table findTable(final List<Table> tables, final String tableName) {
+    public Table findTableByName(final List<Table> tables, final String tableName) {
         return tables.find { it.getName().equals(tableName) }
     }
 
 
     /** Create a new or replace an existing table with the given CSV file */
-    public void publishTable(
+    public Table uploadTableEvenIfItAlreadyExists(
             final String tableName,
             final String projectId,
             final List<String> fileNames,
@@ -211,8 +227,27 @@ class TablesAdapter {
 
         Table table = createTable(projectId, fileNames, tableName, "All members", "Unique Id", []);
         
-        sleep(10000)
+        fileNames.each { uploadFile(table, it, it.endsWith(".csv") ? "text/csv" : "text/plain") }
 
-        fileNames.each { uploadFile(table, it, "text/csv") }
+        table = waitUntilProcessingIsComplete(table.getId())
+        if ("failed".equals(table.getProcessingStatus())) {
+            String msg = "Processing table '${table.getName()}' has failed."
+            log.error(msg)
+            throw new RuntimeException(msg)
+        }
+        else {
+            log.info("Table '${table.getName()}' has processing status '${table.getProcessingStatus()}'")
+            return table
+        }
+    }
+    
+    
+    public Table waitUntilProcessingIsComplete(String id) {
+        Table table = engine.tables().get(id).execute()
+        while ("processing".equals(table.getProcessingStatus())) {
+            sleep(2000)
+            table = engine.tables().get(id).execute()
+        }
+        return table
     }
 }

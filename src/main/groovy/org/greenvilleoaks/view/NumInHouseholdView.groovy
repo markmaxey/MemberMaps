@@ -1,8 +1,12 @@
 package org.greenvilleoaks.view
 
+import com.google.api.services.mapsengine.model.DisplayRule
+import com.google.api.services.mapsengine.model.PointStyle
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 import org.greenvilleoaks.beans.MemberBean
+import org.greenvilleoaks.config.CsvColumnMappings
+import org.greenvilleoaks.map.LayerAdapter
 
 /** The number of households with a given number of people */
 @ToString
@@ -27,5 +31,11 @@ final class NumInHouseholdView extends View {
         }
 
         return numInHouseholdMap
+    }
+
+
+    @Override
+    Map<String, List<DisplayRule>> createDisplayRules(CsvColumnMappings csvColumnMappings, LayerAdapter layerAdapter, PointStyle pointStyle) {
+        return createIdentityDisplayRules(csvColumnMappings.numInHousehold, layerAdapter, pointStyle)
     }
 }

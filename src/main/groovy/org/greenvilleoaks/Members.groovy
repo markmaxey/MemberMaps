@@ -1,15 +1,14 @@
 package org.greenvilleoaks
 
-import com.google.maps.errors.OverQueryLimitException
 import groovy.util.logging.Log4j
 import org.greenvilleoaks.beans.DistanceBean
 import org.greenvilleoaks.beans.MemberBean
 import org.greenvilleoaks.config.Config
 import org.greenvilleoaks.config.CsvColumnMappings
 import org.greenvilleoaks.storage.Csv
+import org.greenvilleoaks.storage.FileUtils
 import org.greenvilleoaks.view.RoleView
 
-import java.lang.reflect.UndeclaredThrowableException
 import java.time.format.DateTimeFormatter
 
 /**
@@ -41,8 +40,6 @@ public final class Members {
             storeGeodedicInfo(geodedicAddresses)
 
             storeDistanceCacheData(distanceCache)
-
-            return members
         }
         catch (Exception ex) {
             log.error("***********************************************")
@@ -56,16 +53,19 @@ public final class Members {
             
             System.exit(1)
         }
+
+        return members
     }
 
-
+    
 
     /** Load member information from a file */
-    public List<MemberBean> loadMembers() {
-        log.info("Loading members from '$config.membersCsvFileName' ...")
+    public List<MemberBean> loadMembers(String fileName=null) {
+        if (fileName == null) fileName = config.membersCsvFileName
+        log.info("Loading members from '$fileName' ...")
         List<MemberBean> members = []
 
-        new Csv(config.membersCsvFileName).load().each {
+        new Csv(fileName).load().each {
             String lastName = it.get(config.membersCsvColumnMappings.lastName)
             if (lastName || !"".equals(lastName.trim())) {
                 members << new MemberBean(it, config.membersCsvColumnMappings, config.dateFormatter, config.memberRoleCommuteList)
@@ -327,7 +327,7 @@ public final class Members {
 
 
     /**
-     * @return The create with geodedic information
+     * @return  A string containing the log of addresses with conflicts, mismatches, or issues
      */
     private void createGeodedicInfo4Members(
             final List<MemberBean> members,
@@ -337,13 +337,16 @@ public final class Members {
 
         Geodedic geodedic = new Geodedic(config.centralPointAddress, google)
 
+        String badAddressesFileName = config.memberStatsDirName + "\\" + config.badAddressesFileName
+        
         geodedic.create(
                 members,
                 new RoleView(config.membersCsvColumnMappings.role, members),
                 config.memberRoleCommuteList,
                 geodedicAddresses,
                 distanceCache,
-                new Distance(google)
+                new Distance(google),
+                badAddressesFileName
         )
     }
 }

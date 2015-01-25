@@ -99,23 +99,12 @@ class MapAdapter {
     public void deleteMapLayers(Set<String> layerIdsPendingDeletion, String mapId) throws IOException {
         assertMapIsNotPublished(mapId);
 
-        log.info("Checking for other layers on this map (ID: " + mapId + ")");
-        Set<String> mapLayerIds = getLayerIdsFromMap(mapId);
+        Map cloneOfMapWithoutLayers = cloneMap(mapId).
+                setContents(removeLayerIdsFromMap(mapId, layerIdsPendingDeletion))
 
-        // Determine if this map will still have layers once we perform our delete.
-        mapLayerIds.removeAll(layerIdsPendingDeletion);
-        if (mapLayerIds.size() == 0) {
-            Map cloneOfMapWithoutLayers = cloneMap(mapId).setContents(new ArrayList<MapItem>())
-
-            // Map will not contain any more Layers when done, so delete it.
-            log.info("Deleting map layers.");
-            engine.maps().patch(mapId, cloneOfMapWithoutLayers).execute();
-            log.info("Map layers deleted.");
-        } else {
-            // Map will contain Layers not scheduled for deletion, so we can't continue.
-            throw new IllegalStateException("Map " + mapId + " contains layers not scheduled for "
-                    + "deletion. You will need to remove them before we can delete this map.");
-        }
+        log.info("Deleting layers from map: " + layerIdsPendingDeletion);
+        engine.maps().patch(mapId, cloneOfMapWithoutLayers).execute();
+        log.info("Map layers deleted.");
     }
 
 
@@ -171,5 +160,52 @@ class MapAdapter {
         }
 
         return layerIds;
+    }
+
+
+
+
+    /** @return the contents of a map (layers & folders with layers) without the given list of layers */
+    public List<MapItem> removeLayerIdsFromMap(
+            final String mapId,
+            final Collection<String> layerIds) throws IOException {
+        // Retrieve the map.
+        Map map = engine.maps().get(mapId).execute();
+
+        // Find the layers
+        return removeLayerIdsFromMap(layerIds, map.getContents())
+    }
+
+
+    public List<MapItem> removeLayerIdsFromMap(
+            final Collection<String> layerIds,
+            final List<MapItem> mapContents) throws IOException {
+
+        if (!layerIds || layerIds.size() == 0) return mapContents
+        
+        List<MapItem> newContents = []
+
+        while (mapContents != null && mapContents.size() > 0) {
+            MapItem item = mapContents.remove(0);
+
+            if (item instanceof MapLayer) {
+                if (!layerIds.contains(((MapLayer) item).getId())) newContents << item
+            } else if (item instanceof MapFolder) {
+                List<MapItem> folderContents = removeLayerIdsFromMap(layerIds, ((MapFolder) item).getContents())
+                if (folderContents.size() > 0) {
+                    newContents << new MapFolder()
+                            .setName(item.getName())
+                            .setContents(folderContents)
+                            .setDefaultViewport(item.getDefaultViewport())
+                            .setExpandable(item.getExpandable())
+                            .setKey(item.getKey())
+                            .setVisibility(item.getVisibility())
+                            .setType(item.getType())
+                }
+            }
+            // MapKmlLinks do not have IDs
+        }
+        
+        return newContents
     }
 }

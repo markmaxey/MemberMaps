@@ -2,8 +2,8 @@ package org.greenvilleoaks.map
 
 public enum StringOperatorEnum {
     contains   ("contains"),
-    startsWith ("starts with"),
-    endsWith   ("ends with"),
+    startsWith ("startsWith"),
+    endsWith   ("endsWith"),
     equals     ("=="),
     notEquals  ("!=")
 
@@ -12,4 +12,6 @@ public enum StringOperatorEnum {
     StringOperatorEnum(final String value) {
         this.value = value
     }
+    
+    public String toString() { return value }
 }
